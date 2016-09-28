@@ -1,17 +1,27 @@
 'use strict';
 
-var airApp = {};
-var url = 'http://:3004';
+var url = 'http://api.dronestre.am/data';
+var droneApp = {};
 
-airApp.getAir = function () {
-    $.ajax({
-        API_URL: url,
-        method: 'GET',
-        dataType: 'json',
-        data: {
-            REQUESTS_LIMIT: 10000
-        }
-    }).then(function (results) {
-        console.log(results);
+droneApp.getDrones = $.ajax({
+    url: url,
+    method: 'GET',
+    dataType: 'jsonp'
+});
+
+$.when(droneApp.getDrones).then(function (data) {
+    data.strike.forEach(function (result) {
+        // group data by country + year
+
+        // keep detailed geolocation information
+
+        // use funciton in console.log() to get the years of each drone strike
+        console.log(result.country);
+
+        //filter data by years
+
+        // filter data by casulties (death_min)
+
+        // display information
     });
-};
+});
