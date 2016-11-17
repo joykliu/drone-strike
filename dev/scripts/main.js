@@ -60,6 +60,6 @@ $.when(droneApp.getDrones).then(data => {
         }
         filteringResult(checkedDates, defaultDates, 'date');
         filteringResult(checkedCountries, defaultCountries, 'country');
-        console.log(droneApp.filteredResult)
+        console.log(droneApp.filteredResult);
     })
 })
