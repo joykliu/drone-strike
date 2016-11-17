@@ -30,22 +30,36 @@ $.when(droneApp.getDrones).then(data => {
         }
         const checkedDates = getCheckedInputValue('date');
         const checkedCountries = getCheckedInputValue('country');
-        const date = 'date';
-        const country = 'country';
-        const defaultCoutries = ['yemen', 'somalia', 'pakistan'];
+        // const date = 'date';
+        // const country = 'country';
+        const defaultCountries = ['Yemen', 'Somalia', 'Pakistan'];
         const defaultDates = ['2002', '2004', '2005', '2006', '2007', '2008', '2009', '2010', '2011', '2012', '2013', '2014', '2015', '2016'];
 
-        let filteringResult = (checkedValues, defaultValues, key) => {
+        let filteringResult = (checkedValues, defaultValues, category) => {
             if(checkedValues.length) {
                 checkedValues.map((criteria) => {
-                    droneApp.filtedResult = data.strike.filter((singleStrike) => {
-                        return singleStrike.date === criteria
+                    droneApp.filteredResult = data.strike.filter((singleStrike) => {
+                        if (category === 'date') {
+                            return singleStrike.date === criteria
+                        } else if (category === 'country') {
+                            return singleStrike.country === criteria
+                        }
+                    })
+                })
+            } else {
+                defaultValues.map((criteria) => {
+                    droneApp.filteredResult = data.strike.filter((singleStrike) => {
+                        if (category === 'date') {
+                            return singleStrike.date === criteria
+                        } else if (category === 'country') {
+                            return singleStrike.country === criteria
+                        }
                     })
                 })
             }
         }
         filteringResult(checkedDates, defaultDates, 'date');
-        console.log(droneApp.filtedResult)
-        // filteringResult(checkedCountries, defaultCoutries, country)
+        filteringResult(checkedCountries, defaultCountries, 'country');
+        console.log(droneApp.filteredResult)
     })
 })
