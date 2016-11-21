@@ -24,6 +24,7 @@ $.when(droneApp.getDrones).then(function (data) {
 
         // display information
     });
+
     $('input[type=checkbox]').on('change', function () {
         var getCheckedInputValue = function getCheckedInputValue(param) {
             return $('input[name=' + param + ']:checked').map(function (input, value) {
@@ -40,7 +41,7 @@ $.when(droneApp.getDrones).then(function (data) {
         var filteringResult = function filteringResult(checkedValues, defaultValues, category) {
             if (checkedValues.length) {
                 checkedValues.map(function (criteria) {
-                    droneApp.filteredResult = data.strike.filter(function (singleStrike) {
+                    return droneApp.filteredResult = data.strike.filter(function (singleStrike) {
                         if (category === 'date') {
                             return singleStrike.date === criteria;
                         } else if (category === 'country') {
@@ -50,7 +51,7 @@ $.when(droneApp.getDrones).then(function (data) {
                 });
             } else {
                 defaultValues.map(function (criteria) {
-                    droneApp.filteredResult = data.strike.filter(function (singleStrike) {
+                    return droneApp.filteredResult = data.strike.filter(function (singleStrike) {
                         if (category === 'date') {
                             return singleStrike.date === criteria;
                         } else if (category === 'country') {
@@ -62,6 +63,10 @@ $.when(droneApp.getDrones).then(function (data) {
         };
         filteringResult(checkedDates, defaultDates, 'date');
         filteringResult(checkedCountries, defaultCountries, 'country');
-        console.log(droneApp.filteredResult);
     });
+
+    droneApp.displyStrikes = function (strikes) {
+        var droneMap = L.map('map').setView([51.505, -0.09], 10);
+        var mapboxKey = 'pk.eyJ1Ijoiam95OTAxN21hcGJveCIsImEiOiJjaW94M2RneXQwMDJ1d2ZtNXp4a29pbTV4In0.TebEkoRfRP8E0hw_Nd3PFA';
+    };
 });

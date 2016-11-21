@@ -22,6 +22,7 @@ $.when(droneApp.getDrones).then(data => {
 
         // display information
     })
+
     $(`input[type=checkbox]`).on('change', ()=> {
         let getCheckedInputValue = (param) => {
             return $(`input[name=${param}]:checked`).map((input, value) => {
@@ -38,7 +39,7 @@ $.when(droneApp.getDrones).then(data => {
         let filteringResult = (checkedValues, defaultValues, category) => {
             if(checkedValues.length) {
                 checkedValues.map((criteria) => {
-                    droneApp.filteredResult = data.strike.filter((singleStrike) => {
+                    return droneApp.filteredResult = data.strike.filter((singleStrike) => {
                         if (category === 'date') {
                             return singleStrike.date === criteria
                         } else if (category === 'country') {
@@ -48,7 +49,7 @@ $.when(droneApp.getDrones).then(data => {
                 })
             } else {
                 defaultValues.map((criteria) => {
-                    droneApp.filteredResult = data.strike.filter((singleStrike) => {
+                    return droneApp.filteredResult = data.strike.filter((singleStrike) => {
                         if (category === 'date') {
                             return singleStrike.date === criteria
                         } else if (category === 'country') {
@@ -60,6 +61,11 @@ $.when(droneApp.getDrones).then(data => {
         }
         filteringResult(checkedDates, defaultDates, 'date');
         filteringResult(checkedCountries, defaultCountries, 'country');
-        console.log(droneApp.filteredResult);
     })
+
+    droneApp.displyStrikes = (strikes) => {
+        let droneMap = L.map('map').setView([51.505, -0.09], 10);
+        const mapboxKey = 'pk.eyJ1Ijoiam95OTAxN21hcGJveCIsImEiOiJjaW94M2RneXQwMDJ1d2ZtNXp4a29pbTV4In0.TebEkoRfRP8E0hw_Nd3PFA';
+        
+    }
 })
