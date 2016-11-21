@@ -1,6 +1,6 @@
 const url = 'http://api.dronestre.am/data';
 const droneApp = {};
-const mapKey = 'pk.eyJ1Ijoiam95OTAxN21hcGJveCIsImEiOiJjaW94M2RneXQwMDJ1d2ZtNXp4a29pbTV4In0.TebEkoRfRP8E0hw_Nd3PFA';
+mapboxgl.accessToken = 'pk.eyJ1Ijoiam95OTAxN21hcGJveCIsImEiOiJjaW94M2RneXQwMDJ1d2ZtNXp4a29pbTV4In0.TebEkoRfRP8E0hw_Nd3PFA';
 
 droneApp.getDrones = $.ajax ({
     url: url,
@@ -53,9 +53,25 @@ $.when(droneApp.getDrones).then(data => {
         }
         filteringResult(checkedDates, defaultDates, 'date',data.strike);
         filteringResult(checkedCountries, defaultCountries, 'country',data.filteredStrikes);
-        console.log(data.filteredStrikes);
+        droneApp.displayStrikes();
     })
 
-    droneApp.displayStrikes = (strikes) => {
+    droneApp.displayStrikes = () => {
+        const map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/streets-v9',
+            hash: true
+        })
+        const displayMarkers = data.filteredStrikes.map((singleStrike) => {
+            console.log(singleStrike);
+            const lat = singleStrike.lat,
+                lon = singleStrike.lon;
+            // Creating dom element for Marker
+            const el = document.createElement('div');
+            el.id = 'Marker';
+            const marker = new mapboxgl.Marker(el)
+                .setLngLat([lon, lat])
+                .addTo(map);
+        })
     }
 })

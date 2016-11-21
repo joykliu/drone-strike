@@ -2,7 +2,7 @@
 
 var url = 'http://api.dronestre.am/data';
 var droneApp = {};
-var mapKey = 'pk.eyJ1Ijoiam95OTAxN21hcGJveCIsImEiOiJjaW94M2RneXQwMDJ1d2ZtNXp4a29pbTV4In0.TebEkoRfRP8E0hw_Nd3PFA';
+mapboxgl.accessToken = 'pk.eyJ1Ijoiam95OTAxN21hcGJveCIsImEiOiJjaW94M2RneXQwMDJ1d2ZtNXp4a29pbTV4In0.TebEkoRfRP8E0hw_Nd3PFA';
 
 droneApp.getDrones = $.ajax({
     url: url,
@@ -55,8 +55,23 @@ $.when(droneApp.getDrones).then(function (data) {
         };
         filteringResult(checkedDates, defaultDates, 'date', data.strike);
         filteringResult(checkedCountries, defaultCountries, 'country', data.filteredStrikes);
-        console.log(data.filteredStrikes);
+        droneApp.displayStrikes();
     });
 
-    droneApp.displayStrikes = function (strikes) {};
+    droneApp.displayStrikes = function () {
+        var map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/streets-v9',
+            hash: true
+        });
+        var displayMarkers = data.filteredStrikes.map(function (singleStrike) {
+            console.log(singleStrike);
+            var lat = singleStrike.lat,
+                lon = singleStrike.lon;
+            // Creating dom element for Marker
+            var el = document.createElement('div');
+            el.id = 'Marker';
+            var marker = new mapboxgl.Marker(el).setLngLat([lon, lat]).addTo(map);
+        });
+    };
 });
