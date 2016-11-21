@@ -64,8 +64,6 @@ $.when(droneApp.getDrones).then(data => {
     })
 
     droneApp.displyStrikes = (strikes) => {
-        let droneMap = L.map('map').setView([51.505, -0.09], 10);
-        const mapboxKey = 'pk.eyJ1Ijoiam95OTAxN21hcGJveCIsImEiOiJjaW94M2RneXQwMDJ1d2ZtNXp4a29pbTV4In0.TebEkoRfRP8E0hw_Nd3PFA';
         
     }
 })

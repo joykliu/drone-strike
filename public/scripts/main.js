@@ -65,8 +65,5 @@ $.when(droneApp.getDrones).then(function (data) {
         filteringResult(checkedCountries, defaultCountries, 'country');
     });
 
-    droneApp.displyStrikes = function (strikes) {
-        var droneMap = L.map('map').setView([51.505, -0.09], 10);
-        var mapboxKey = 'pk.eyJ1Ijoiam95OTAxN21hcGJveCIsImEiOiJjaW94M2RneXQwMDJ1d2ZtNXp4a29pbTV4In0.TebEkoRfRP8E0hw_Nd3PFA';
-    };
+    droneApp.displyStrikes = function (strikes) {};
 });
