@@ -38,7 +38,7 @@ $.when(droneApp.getDrones).then(function (data) {
                 });
             } else {
                 var filteredRaw = defaultValues.map(function (criteria) {
-                    return data.strike.filter(function (singleStrike) {
+                    return baseData.filter(function (singleStrike) {
                         if (category === 'date') {
                             return singleStrike.date === criteria;
                         } else if (category === 'country') {
@@ -53,7 +53,7 @@ $.when(droneApp.getDrones).then(function (data) {
             data.filteredStrikes = filteredResult;
             // return data;
         };
-        filteringResult(checkedDates, defaultDates, 'date', data.filteredStrikes);
+        filteringResult(checkedDates, defaultDates, 'date', data.strike);
         filteringResult(checkedCountries, defaultCountries, 'country', data.filteredStrikes);
         console.log(data.filteredStrikes);
     });

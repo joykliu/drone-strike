@@ -36,7 +36,7 @@ $.when(droneApp.getDrones).then(data => {
                 })
             } else {
                 var filteredRaw = defaultValues.map((criteria) => {
-                    return data.strike.filter((singleStrike) => {
+                    return baseData.filter((singleStrike) => {
                         if (category === 'date') {
                             return singleStrike.date === criteria
                         } else if (category === 'country') {
@@ -51,7 +51,7 @@ $.when(droneApp.getDrones).then(data => {
             data.filteredStrikes = filteredResult;
             // return data;
         }
-        filteringResult(checkedDates, defaultDates, 'date',data.filteredStrikes);
+        filteringResult(checkedDates, defaultDates, 'date',data.strike);
         filteringResult(checkedCountries, defaultCountries, 'country',data.filteredStrikes);
         console.log(data.filteredStrikes);
     })
