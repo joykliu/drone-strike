@@ -70,7 +70,6 @@ $.when(droneApp.getDrones).then(function (data) {
                 lon = singleStrike.lon;
             // Creating dom element for Marker
             var el = document.createElement('div');
-            el.id = 'Marker';
             var marker = new mapboxgl.Marker(el).setLngLat([lon, lat]).addTo(map);
         });
     };

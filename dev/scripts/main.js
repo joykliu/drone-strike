@@ -68,7 +68,6 @@ $.when(droneApp.getDrones).then(data => {
                 lon = singleStrike.lon;
             // Creating dom element for Marker
             const el = document.createElement('div');
-            el.id = 'Marker';
             const marker = new mapboxgl.Marker(el)
                 .setLngLat([lon, lat])
                 .addTo(map);
