@@ -63,7 +63,6 @@ $.when(droneApp.getDrones).then(data => {
             hash: true
         })
         const displayMarkers = data.filteredStrikes.map((singleStrike) => {
-            console.log(singleStrike);
             const lat = singleStrike.lat,
                 lon = singleStrike.lon;
             // Creating dom element for Marker
@@ -71,6 +70,10 @@ $.when(droneApp.getDrones).then(data => {
             const marker = new mapboxgl.Marker(el)
                 .setLngLat([lon, lat])
                 .addTo(map);
+            const arr = [[lon, lat]];
+            // const llb = mapboxgl.LngLatBounds.convert(arr);
+            // const bounds = mapboxgl.LngLat([lon,lat]);
+            // console.log(marker._lngLat.toArray())
         })
     }
 })

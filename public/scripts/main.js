@@ -65,12 +65,15 @@ $.when(droneApp.getDrones).then(function (data) {
             hash: true
         });
         var displayMarkers = data.filteredStrikes.map(function (singleStrike) {
-            console.log(singleStrike);
             var lat = singleStrike.lat,
                 lon = singleStrike.lon;
             // Creating dom element for Marker
             var el = document.createElement('div');
             var marker = new mapboxgl.Marker(el).setLngLat([lon, lat]).addTo(map);
+            var arr = [[lon, lat]];
+            // const llb = mapboxgl.LngLatBounds.convert(arr);
+            // const bounds = mapboxgl.LngLat([lon,lat]);
+            // console.log(marker._lngLat.toArray())
         });
     };
 });
