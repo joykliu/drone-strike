@@ -78,28 +78,46 @@ $.when(droneApp.getDrones).then(data => {
             container: 'map',
             style: 'mapbox://styles/mapbox/streets-v9'
         })
-
+        // create empty array to store markers
+        let markerArr = [];
         // display markers
-        const displayMarkers = data.filteredStrikes.map((singleStrike) => {
+        const displayMarkers = data.filteredStrikes.forEach((singleStrike) => {
             // define marker latitute and longtitute
-            var lat = singleStrike.lat
+            let lat = singleStrike.lat
             ,     lon = singleStrike.lon;
             if (lat.length && lon.length) {
                 // when location exists create dom element for Marker
                 const el = document.createElement('div');
                 el.className = 'marker';
-
                 // add markeres to map
                 droneApp.markers = new mapboxgl.Marker(el)
                 .setLngLat([lon, lat])
                 .addTo(map);
+                // push markers to empty array
+                markerArr.push([lon, lat])
             };
-            var bounds = new mapboxgl.Marker.LngLatBounds();
-
-            /** NOTE: SOLUTION 1: CREATE FEATURE GROUP FOR MARKERS, GET FEATURE GROUP BOUNDS
-            *** SOLUTION 2: FILTER LAT AND LNG, FIND EXTREME POINTS AND FORM COORDINATES */
-
         })
+        console.log(markerArr)
+        /** NOTE: SOLUTION 1: CREATE FEATURE GROUP (GEOJSON) FOR MARKERS, GET FEATURE GROUP BOUNDS
+        *** SOLUTION 2: FILTER LAT AND LNG, FIND EXTREME POINTS AND FORM COORDINATES */
+        const fitMap = () => {
+            let geojson = {
+                "type": "FeatureCollection",
+                  "features": [
+                    {
+                      "type": "Feature",
+                      "properties": {},
+                      "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [
+                          markerArr
+                        ]
+                      }
+                    }
+                  ]
+            }
+        }
+        fitMap();
 
     }
 })
