@@ -87,15 +87,17 @@ $.when(droneApp.getDrones).then(function (data) {
             var lat = singleStrike.lat,
                 lon = singleStrike.lon;
             if (lat.length && lon.length) {
+                // when location exists create dom element for Marker
                 var el = document.createElement('div');
                 el.className = 'marker';
 
                 // add markeres to map
                 droneApp.markers = new mapboxgl.Marker(el).setLngLat([lon, lat]).addTo(map);
             };
-            // create dom element for Marker
-        });
+            var bounds = new mapboxgl.Marker.LngLatBounds();
 
-        // console.log(droneApp.markers)
+            /** NOTE: SOLUTION 1: CREATE FEATURE GROUP FOR MARKERS, GET FEATURE GROUP BOUNDS
+            *** SOLUTION 2: FILTER LAT AND LNG, FIND EXTREME POINTS AND FORM COORDINATES */
+        });
     };
 });

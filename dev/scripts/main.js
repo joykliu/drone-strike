@@ -85,6 +85,7 @@ $.when(droneApp.getDrones).then(data => {
             var lat = singleStrike.lat
             ,     lon = singleStrike.lon;
             if (lat.length && lon.length) {
+                // when location exists create dom element for Marker
                 const el = document.createElement('div');
                 el.className = 'marker';
 
@@ -93,9 +94,12 @@ $.when(droneApp.getDrones).then(data => {
                 .setLngLat([lon, lat])
                 .addTo(map);
             };
-            // create dom element for Marker
+            var bounds = new mapboxgl.Marker.LngLatBounds();
+
+            /** NOTE: SOLUTION 1: CREATE FEATURE GROUP FOR MARKERS, GET FEATURE GROUP BOUNDS
+            *** SOLUTION 2: FILTER LAT AND LNG, FIND EXTREME POINTS AND FORM COORDINATES */
+
         })
 
-        // console.log(droneApp.markers)
     }
 })
