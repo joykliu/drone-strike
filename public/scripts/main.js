@@ -86,19 +86,16 @@ $.when(droneApp.getDrones).then(function (data) {
             // define marker latitute and longtitute
             var lat = singleStrike.lat,
                 lon = singleStrike.lon;
+            if (lat.length && lon.length) {
+                var el = document.createElement('div');
+                el.className = 'marker';
 
+                // add markeres to map
+                droneApp.markers = new mapboxgl.Marker(el).setLngLat([lon, lat]).addTo(map);
+            };
             // create dom element for Marker
-            var el = document.createElement('div');
-            el.className = 'marker';
-
-            // add markeres to map
-            droneApp.markers = new mapboxgl.Marker(el).setLngLat([lon, lat]).addTo(map);
-            console.log(droneApp.markers.getLngLat());
-            var ll = droneApp.markers.getLngLat();
-            var bounds = new mapboxgl.LngLatBounds();
-            // const ll = new mapboxgl.LngLat(lon, lat);
-            bounds.extend(ll);
-            map.fitBounds(bounds);
         });
+
+        // console.log(droneApp.markers)
     };
 });

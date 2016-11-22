@@ -82,24 +82,20 @@ $.when(droneApp.getDrones).then(data => {
         // display markers
         const displayMarkers = data.filteredStrikes.map((singleStrike) => {
             // define marker latitute and longtitute
-            const lat = singleStrike.lat
+            var lat = singleStrike.lat
             ,     lon = singleStrike.lon;
+            if (lat.length && lon.length) {
+                const el = document.createElement('div');
+                el.className = 'marker';
 
-            // create dom element for Marker
-            const el = document.createElement('div');
-            el.className = 'marker';
-
-            // add markeres to map
-            droneApp.markers = new mapboxgl.Marker(el)
+                // add markeres to map
+                droneApp.markers = new mapboxgl.Marker(el)
                 .setLngLat([lon, lat])
                 .addTo(map);
-            console.log(droneApp.markers.getLngLat());
-            const ll = droneApp.markers.getLngLat();
-            let bounds = new mapboxgl.LngLatBounds();
-            // const ll = new mapboxgl.LngLat(lon, lat);
-            bounds.extend(ll);
-            map.fitBounds(bounds)
+            };
+            // create dom element for Marker
         })
 
+        // console.log(droneApp.markers)
     }
 })
