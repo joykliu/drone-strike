@@ -25,7 +25,6 @@ $.when(droneApp.getDrones).then(function (data) {
                 return $(value).val();
             }).toArray();
         };
-
         // define checked and default values for filter use
         var checkedDates = getCheckedInputValue('date');
         var checkedCountries = getCheckedInputValue('country');;
@@ -57,7 +56,6 @@ $.when(droneApp.getDrones).then(function (data) {
                     });
                 });
             }
-
             // turn filtered result, a multilevel array, into a flattened array
             var filteredResult = $.map(filteredRaw, function (n) {
                 return n;
@@ -65,10 +63,8 @@ $.when(droneApp.getDrones).then(function (data) {
             data.filteredStrikes = filteredResult;
             // return data;
         };
-
         // first call for data to be filtered with an original dataset
         filteringResult(checkedDates, defaultDates, 'date', data.strike);
-
         // then call for data to be filtered wiht an filtered dataset
         filteringResult(checkedCountries, defaultCountries, 'country', data.filteredStrikes);
         droneApp.displayStrikes();
@@ -98,28 +94,30 @@ $.when(droneApp.getDrones).then(function (data) {
             };
         });
 
-        /** NOTE: SOLUTION 1: CREATE FEATURE GROUP (GEOJSON) FOR MARKERS, GET FEATURE GROUP BOUNDS
-        *** SOLUTION 2: FILTER LAT AND LNG, FIND EXTREME POINTS AND FORM COORDINATES */
-        var fitMap = function fitMap() {
-            // var bounds = markerArr.getBounds();
-            var geojson = {
-                "type": "FeatureCollection",
-                "features": [{
-                    "type": "Feature",
-                    "geometry": {
-                        "type": "Markers",
-                        "properties": {},
-                        "coordinates": markerArr
-                    }
-                }]
-            };
-
-            var coordinates = geojson.features[0].geometry.coordinates;
-            var bounds = coordinates.reduce(function (bounds, coord) {
-                return bounds.extend(coord);
-            }, new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]));
-            map.fitBounds(bounds, { padding: 50 });
+        // fit map to marker bounds
+        // NOTE: SOLUTION 1: CREATE FEATURE GROUP (GEOJSON) FOR MARKERS, GET FEATURE GROUP BOUNDS
+        // create geojson object to store marker coordinates sotred in markerArry
+        var geojson = {
+            "type": "FeatureCollection",
+            "features": [{
+                "type": "Feature",
+                "geometry": {
+                    "type": "Markers",
+                    "properties": {},
+                    "coordinates": markerArr
+                }
+            }]
         };
-        fitMap();
+        var coordinates = geojson.features[0].geometry.coordinates;
+
+        /* Pass the first coordinates in markerArry to `lngLatBounds` &
+        ** wrap each coordinate pair in `extend` to include them in the bounds
+        ** result. A variation of this technique could be applied to zooming
+        ** to the bounds of multiple Points or Polygon geomteries - it just
+        ** requires wrapping all the coordinates with the extend method. */
+        var bounds = coordinates.reduce(function (bounds, coord) {
+            return bounds.extend(coord);
+        }, new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]));
+        map.fitBounds(bounds, { padding: 50 });
     };
 });
