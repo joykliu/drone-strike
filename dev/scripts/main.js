@@ -97,25 +97,28 @@ $.when(droneApp.getDrones).then(data => {
                 markerArr.push([lon, lat])
             };
         })
-        console.log(markerArr)
+
         /** NOTE: SOLUTION 1: CREATE FEATURE GROUP (GEOJSON) FOR MARKERS, GET FEATURE GROUP BOUNDS
         *** SOLUTION 2: FILTER LAT AND LNG, FIND EXTREME POINTS AND FORM COORDINATES */
         const fitMap = () => {
-            let geojson = {
+            // var bounds = markerArr.getBounds();
+            var geojson = {
                 "type": "FeatureCollection",
-                  "features": [
-                    {
-                      "type": "Feature",
-                      "properties": {},
-                      "geometry": {
-                        "type": "Polygon",
-                        "coordinates": [
-                          markerArr
-                        ]
-                      }
+                "features": [{
+                    "type": "Feature",
+                    "geometry": {
+                        "type": "Markers",
+                        "properties": {},
+                        "coordinates": markerArr
                     }
-                  ]
-            }
+                }]
+            };
+
+            const coordinates = geojson.features[0].geometry.coordinates;
+            const bounds = coordinates.reduce(function(bounds, coord) {
+                    return bounds.extend(coord);
+                }, new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]));
+            map.fitBounds(bounds, {padding:50});
         }
         fitMap();
 
