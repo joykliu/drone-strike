@@ -72,12 +72,12 @@ $.when(droneApp.getDrones).then(function (data) {
 
     droneApp.displayStrikes = function () {
         // display map
+        var markerArr = [];
         var map = new mapboxgl.Map({
             container: 'map',
             style: 'mapbox://styles/mapbox/streets-v9'
         });
         // create empty array to store markers
-        var markerArr = [];
         // display markers
         var displayMarkers = data.filteredStrikes.forEach(function (singleStrike) {
             // define marker latitute and longtitute
@@ -93,31 +93,69 @@ $.when(droneApp.getDrones).then(function (data) {
                 markerArr.push([lon, lat]);
             };
         });
-
         // fit map to marker bounds
         // NOTE: SOLUTION 1: CREATE FEATURE GROUP (GEOJSON) FOR MARKERS, GET FEATURE GROUP BOUNDS
         // create geojson object to store marker coordinates sotred in markerArry
-        var geojson = {
-            "type": "FeatureCollection",
-            "features": [{
-                "type": "Feature",
-                "geometry": {
-                    "type": "Markers",
-                    "properties": {},
-                    "coordinates": markerArr
-                }
-            }]
-        };
-        var coordinates = geojson.features[0].geometry.coordinates;
+        var fitMap = function fitMap() {
+            var geojson = {
+                "type": "FeatureCollection",
+                "features": [{
+                    "type": "Feature",
+                    "geometry": {
+                        "type": "Markers",
+                        "properties": {},
+                        "coordinates": markerArr
+                    }
+                }]
+            };
+            var coordinates = geojson.features[0].geometry.coordinates;
 
-        /* Pass the first coordinates in markerArry to `lngLatBounds` &
-        ** wrap each coordinate pair in `extend` to include them in the bounds
-        ** result. A variation of this technique could be applied to zooming
-        ** to the bounds of multiple Points or Polygon geomteries - it just
-        ** requires wrapping all the coordinates with the extend method. */
-        var bounds = coordinates.reduce(function (bounds, coord) {
-            return bounds.extend(coord);
-        }, new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]));
-        map.fitBounds(bounds, { padding: 50 });
+            /* Pass the first coordinates in markerArry to `lngLatBounds` &
+            ** wrap each coordinate pair in `extend` to include them in the bounds
+            ** result. A variation of this technique could be applied to zooming
+            ** to the bounds of multiple Points or Polygon geomteries - it just
+            ** requires wrapping all the coordinates with the extend method. */
+            var bounds = coordinates.reduce(function (bounds, coord) {
+                return bounds.extend(coord);
+            }, new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]));
+            map.fitBounds(bounds, { padding: 50 });
+        };
+        fitMap();
+
+        var displayPopup = data.filteredStrikes.map(function (singleStrike) {
+            // define information contained in popup
+            //NOTE👇: DO NOT DO THIS FIND A WAY TO WRAP THIS BETTER
+            var getPopupInfo = function getPopupInfo() {
+                var town = void 0;
+                if (singleStrike.town.length) {
+                    town = singleStrike.town;
+                } else {
+                    town = 'Unkown';
+                }
+                var summary = void 0;
+                if (singleStrike.bij_summary_short.length) {
+                    summary = singleStrike.bij_summary_short;
+                } else if (singleStrike.narrative.length) {
+                    summary = singleStrike.narrative;
+                } else {
+                    summary = 'Awaiting detailed information on this strike...';
+                }
+                var link = void 0;
+                if (singleStrike.bij_link.length) {
+                    link = singleStrike.bij_summary_short.length;
+                }
+                var deaths = void 0;
+                var numberReconstruct = function numberReconstruct() {
+                    var number = singleStrike.deaths;
+                    if (number.length > 2) {
+                        deaths = number.split('-').join(' to ');
+                    } else {
+                        deaths = number;
+                    }
+                };
+                numberReconstruct();
+            };
+            getPopupInfo();
+        });
     };
 });

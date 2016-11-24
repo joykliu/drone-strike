@@ -70,12 +70,12 @@ $.when(droneApp.getDrones).then(data => {
 
     droneApp.displayStrikes = () => {
         // display map
+        let markerArr = [];
         const map = new mapboxgl.Map({
             container: 'map',
             style: 'mapbox://styles/mapbox/streets-v9'
         })
         // create empty array to store markers
-        let markerArr = [];
         // display markers
         const displayMarkers = data.filteredStrikes.forEach((singleStrike) => {
             // define marker latitute and longtitute
@@ -93,31 +93,72 @@ $.when(droneApp.getDrones).then(data => {
                 markerArr.push([lon, lat])
             };
         })
-
         // fit map to marker bounds
         // NOTE: SOLUTION 1: CREATE FEATURE GROUP (GEOJSON) FOR MARKERS, GET FEATURE GROUP BOUNDS
         // create geojson object to store marker coordinates sotred in markerArry
-        const geojson = {
-            "type": "FeatureCollection",
-            "features": [{
-                "type": "Feature",
-                "geometry": {
-                    "type": "Markers",
-                    "properties": {},
-                    "coordinates": markerArr
-                }
-            }]
-        };
-        const coordinates = geojson.features[0].geometry.coordinates;
+        const fitMap = () => {
+            const geojson = {
+                "type": "FeatureCollection",
+                "features": [{
+                    "type": "Feature",
+                    "geometry": {
+                        "type": "Markers",
+                        "properties": {},
+                        "coordinates": markerArr
+                    }
+                }]
+            };
+            const coordinates = geojson.features[0].geometry.coordinates;
 
-        /* Pass the first coordinates in markerArry to `lngLatBounds` &
-        ** wrap each coordinate pair in `extend` to include them in the bounds
-        ** result. A variation of this technique could be applied to zooming
-        ** to the bounds of multiple Points or Polygon geomteries - it just
-        ** requires wrapping all the coordinates with the extend method. */
-        const bounds = coordinates.reduce(function(bounds, coord) {
-            return bounds.extend(coord);
-        }, new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]));
-        map.fitBounds(bounds, {padding:50});
+            /* Pass the first coordinates in markerArry to `lngLatBounds` &
+            ** wrap each coordinate pair in `extend` to include them in the bounds
+            ** result. A variation of this technique could be applied to zooming
+            ** to the bounds of multiple Points or Polygon geomteries - it just
+            ** requires wrapping all the coordinates with the extend method. */
+            const bounds = coordinates.reduce(function(bounds, coord) {
+                return bounds.extend(coord);
+            }, new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]));
+            map.fitBounds(bounds, {padding:50});
+        }
+        fitMap();
+
+        const displayPopup = data.filteredStrikes.map((singleStrike) => {
+            // define information contained in popup
+            //NOTE👇: DO NOT DO THIS FIND A WAY TO WRAP THIS BETTER
+            const getPopupInfo = () => {
+                let town;
+                if (singleStrike.town.length) {
+                    town = singleStrike.town;
+                } else {
+                    town = 'Unkown'
+                }
+                let summary;
+                if (singleStrike.bij_summary_short.length) {
+                    summary = singleStrike.bij_summary_short
+                } else if (singleStrike.narrative.length){
+                    summary = singleStrike.narrative
+                } else {
+                    summary = 'Awaiting detailed information on this strike...'
+                }
+                let link;
+                if (singleStrike.bij_link.length) {
+                    link = singleStrike.bij_summary_short.length
+                }
+                let deaths;
+                const numberReconstruct = () => {
+                    let number = singleStrike.deaths;
+                    if(number.length > 2) {
+                        deaths = number.split('-').join(' to ')
+                    } else {
+                        deaths = number;
+                    }
+                }
+                numberReconstruct();
+            }
+            getPopupInfo();
+
+        })
+
+
     }
 })
