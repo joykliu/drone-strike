@@ -12,7 +12,7 @@ droneApp.getDrones = $.ajax ({
 
 $.when(droneApp.getDrones).then(data => {
     // show date as year form
-    droneApp.init = () => {
+    droneApp.filteringResult = () => {
         data.strike.map(result => {
             result.date = result.date.split('-')[0];
         })
@@ -168,6 +168,10 @@ $.when(droneApp.getDrones).then(data => {
         displayMap();
         displayMarkers();
         fitMap();
+    }
+
+    droneApp.init = () => {
+        droneApp.filteringResult();
     }
 
     droneApp.init();
