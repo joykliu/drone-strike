@@ -124,15 +124,21 @@ $.when(droneApp.getDrones).then(function (data) {
 
         var displayPopup = data.filteredStrikes.map(function (singleStrike) {
             // define information contained in popup
+            var town = void 0,
+                summary = void 0,
+                link = void 0,
+                deaths = void 0;
+
             //NOTE👇: DO NOT DO THIS FIND A WAY TO WRAP THIS BETTER
             var getPopupInfo = function getPopupInfo() {
-                var town = void 0;
                 if (singleStrike.town.length) {
                     town = singleStrike.town;
+                } else if (singleStrike.location.length) {
+                    town = singleStrike.location;
                 } else {
-                    town = 'Unkown';
+                    town = 'Unknown';
                 }
-                var summary = void 0;
+
                 if (singleStrike.bij_summary_short.length) {
                     summary = singleStrike.bij_summary_short;
                 } else if (singleStrike.narrative.length) {
@@ -140,11 +146,11 @@ $.when(droneApp.getDrones).then(function (data) {
                 } else {
                     summary = 'Awaiting detailed information on this strike...';
                 }
-                var link = void 0;
+
                 if (singleStrike.bij_link.length) {
                     link = singleStrike.bij_summary_short.length;
                 }
-                var deaths = void 0;
+
                 var numberReconstruct = function numberReconstruct() {
                     var number = singleStrike.deaths;
                     if (number.length > 2) {

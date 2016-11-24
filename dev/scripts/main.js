@@ -124,15 +124,18 @@ $.when(droneApp.getDrones).then(data => {
 
         const displayPopup = data.filteredStrikes.map((singleStrike) => {
             // define information contained in popup
+            let town, summary, link, deaths;
+
             //NOTE👇: DO NOT DO THIS FIND A WAY TO WRAP THIS BETTER
             const getPopupInfo = () => {
-                let town;
                 if (singleStrike.town.length) {
                     town = singleStrike.town;
+                } else if (singleStrike.location.length){
+                    town = singleStrike.location
                 } else {
-                    town = 'Unkown'
+                    town = 'Unknown'
                 }
-                let summary;
+
                 if (singleStrike.bij_summary_short.length) {
                     summary = singleStrike.bij_summary_short
                 } else if (singleStrike.narrative.length){
@@ -140,11 +143,11 @@ $.when(droneApp.getDrones).then(data => {
                 } else {
                     summary = 'Awaiting detailed information on this strike...'
                 }
-                let link;
+
                 if (singleStrike.bij_link.length) {
                     link = singleStrike.bij_summary_short.length
                 }
-                let deaths;
+
                 const numberReconstruct = () => {
                     let number = singleStrike.deaths;
                     if(number.length > 2) {
@@ -156,7 +159,6 @@ $.when(droneApp.getDrones).then(data => {
                 numberReconstruct();
             }
             getPopupInfo();
-
         })
 
 
