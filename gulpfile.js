@@ -29,7 +29,7 @@ gulp.task('watch', () => {
 gulp.task('scripts', () => {
     gulp.src('dev/scripts/main.js')
     .on('error', onError)
-        .pipe(sourcemaps.init())
+        .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(babel({
             presets:['es2015']
         }))
