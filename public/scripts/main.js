@@ -16,7 +16,12 @@ $.when(droneApp.getDrones).then(function (data) {
     // show date as year form
     droneApp.filteringResult = function () {
         data.strike.map(function (result) {
-            result.date = result.date.split('-')[0];
+            var m_names = new Array("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December");
+            result.date = result.date.split('-').splice(0, 2);
+            result.year = result.date[0];
+            var dateObj = new Date(result.date);
+            var month = m_names[dateObj.getMonth()];
+            result.displayDate = month + ', ' + result.year;
         });
 
         $('input[type=checkbox]').on('change', function () {
@@ -27,10 +32,10 @@ $.when(droneApp.getDrones).then(function (data) {
                 }).toArray();
             };
             // define checked and default values for filter use
-            var checkedDates = getCheckedInputValue('date');
+            var checkedYears = getCheckedInputValue('year');
             var checkedCountries = getCheckedInputValue('country');;
             var defaultCountries = ['Yemen', 'Somalia', 'Pakistan'];
-            var defaultDates = ['2002', '2004', '2005', '2006', '2007', '2008', '2009', '2010', '2011', '2012', '2013', '2014', '2015', '2016'];
+            var defaultYears = ['2002', '2004', '2005', '2006', '2007', '2008', '2009', '2010', '2011', '2012', '2013', '2014', '2015', '2016'];
 
             // filter resutls
             var filteringResult = function filteringResult(checkedValues, defaultValues, category, baseData) {
@@ -38,8 +43,8 @@ $.when(droneApp.getDrones).then(function (data) {
                     // when the user makes a selection filter data against checked boxes
                     var filteredRaw = checkedValues.map(function (criteria) {
                         return baseData.filter(function (singleStrike) {
-                            if (category === 'date') {
-                                return singleStrike.date === criteria;
+                            if (category === 'year') {
+                                return singleStrike.year === criteria;
                             } else if (category === 'country') {
                                 return singleStrike.country === criteria;
                             }
@@ -49,8 +54,8 @@ $.when(droneApp.getDrones).then(function (data) {
                     // when no selection is made, show all possible results
                     var filteredRaw = defaultValues.map(function (criteria) {
                         return baseData.filter(function (singleStrike) {
-                            if (category === 'date') {
-                                return singleStrike.date === criteria;
+                            if (category === 'year') {
+                                return singleStrike.year === criteria;
                             } else if (category === 'country') {
                                 return singleStrike.country === criteria;
                             }
@@ -65,7 +70,7 @@ $.when(droneApp.getDrones).then(function (data) {
                 // return data;
             };
             // first call for data to be filtered with an original dataset
-            filteringResult(checkedDates, defaultDates, 'date', data.strike);
+            filteringResult(checkedYears, defaultYears, 'year', data.strike);
             // then call for data to be filtered wiht an filtered dataset
             filteringResult(checkedCountries, defaultCountries, 'country', data.filteredStrikes);
             droneApp.displayStrikes();
@@ -88,12 +93,13 @@ $.when(droneApp.getDrones).then(function (data) {
                 // define marker latitute and longtitute
                 var lat = singleStrike.lat,
                     lon = singleStrike.lon;
-
+                console.log(singleStrike);
                 // define information contained in popup
                 var town = void 0,
                     summary = void 0,
                     link = void 0,
-                    deaths = void 0;
+                    deaths = void 0,
+                    time = void 0;
                 //NOTE👇: DO NOT DO THIS FIND A WAY TO WRAP THIS BETTER
                 var getPopupInfo = function getPopupInfo() {
                     if (singleStrike.town.length) {
@@ -104,16 +110,20 @@ $.when(droneApp.getDrones).then(function (data) {
                         town = 'Unknown';
                     }
 
-                    if (singleStrike.bij_summary_short.length) {
-                        summary = singleStrike.bij_summary_short;
-                    } else if (singleStrike.narrative.length) {
+                    if (singleStrike.narrative.length) {
                         summary = singleStrike.narrative;
+                    } else if (singleStrike.bij_summary_short.length) {
+                        summary = singleStrike.bij_summary_short;
                     } else {
                         summary = 'Awaiting detailed information on this strike...';
                     }
 
                     if (singleStrike.bij_link.length) {
                         link = singleStrike.bij_summary_short.length;
+                    }
+
+                    if (singleStrike.displayDate.length) {
+                        time = singleStrike.displayDate;
                     }
 
                     var numberReconstruct = function numberReconstruct() {
@@ -127,7 +137,7 @@ $.when(droneApp.getDrones).then(function (data) {
                     numberReconstruct();
                 };
                 getPopupInfo();
-                var popup = new mapboxgl.Popup({ offset: [0, -30] }).setText('sup');
+                var popup = new mapboxgl.Popup({ offset: [0, 0] }).setHTML('\n                    <div class="marker-content">\n                        <p>' + time + '</p>\n                        <h3>' + town + '</h3>\n                        <h4>Deaths: ' + deaths + '</h4>\n                        <p>' + summary + '</p>\n                        <a href="' + link + '">More Details...</a>\n                    </div>\n                    ');
                 if (lat.length && lon.length) {
                     // when location exists create dom element for Marker
                     var el = document.createElement('div');

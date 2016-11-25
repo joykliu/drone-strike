@@ -14,7 +14,12 @@ $.when(droneApp.getDrones).then(data => {
     // show date as year form
     droneApp.filteringResult = () => {
         data.strike.map(result => {
-            result.date = result.date.split('-')[0];
+            const m_names = new Array("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December");
+            result.date = result.date.split('-').splice(0,2);
+            result.year = result.date[0];
+            let dateObj = new Date(result.date);
+            const month = m_names[dateObj.getMonth()];
+            result.displayDate = `${month}, ${result.year}`;
         })
 
         $(`input[type=checkbox]`).on('change', ()=> {
@@ -25,10 +30,10 @@ $.when(droneApp.getDrones).then(data => {
                 }).toArray();
             }
             // define checked and default values for filter use
-            const checkedDates = getCheckedInputValue('date');
+            const checkedYears = getCheckedInputValue('year');
             const checkedCountries = getCheckedInputValue('country');;
             const defaultCountries = ['Yemen', 'Somalia', 'Pakistan'];
-            const defaultDates = ['2002', '2004', '2005', '2006', '2007', '2008', '2009', '2010', '2011', '2012', '2013', '2014', '2015', '2016'];
+            const defaultYears = ['2002', '2004', '2005', '2006', '2007', '2008', '2009', '2010', '2011', '2012', '2013', '2014', '2015', '2016'];
 
             // filter resutls
             const filteringResult = (checkedValues, defaultValues, category, baseData) => {
@@ -36,8 +41,8 @@ $.when(droneApp.getDrones).then(data => {
                     // when the user makes a selection filter data against checked boxes
                     var filteredRaw = checkedValues.map((criteria) => {
                         return baseData.filter((singleStrike) => {
-                            if (category === 'date') {
-                                return singleStrike.date === criteria
+                            if (category === 'year') {
+                                return singleStrike.year === criteria
                             } else if (category === 'country') {
                                 return singleStrike.country === criteria
                             }
@@ -47,8 +52,8 @@ $.when(droneApp.getDrones).then(data => {
                     // when no selection is made, show all possible results
                     var filteredRaw = defaultValues.map((criteria) => {
                         return baseData.filter((singleStrike) => {
-                            if (category === 'date') {
-                                return singleStrike.date === criteria
+                            if (category === 'year') {
+                                return singleStrike.year === criteria
                             } else if (category === 'country') {
                                 return singleStrike.country === criteria;
                             }
@@ -63,7 +68,7 @@ $.when(droneApp.getDrones).then(data => {
                 // return data;
             }
             // first call for data to be filtered with an original dataset
-            filteringResult(checkedDates, defaultDates, 'date',data.strike);
+            filteringResult(checkedYears, defaultYears, 'year', data.strike);
             // then call for data to be filtered wiht an filtered dataset
             filteringResult(checkedCountries, defaultCountries, 'country',data.filteredStrikes);
             droneApp.displayStrikes();
@@ -86,9 +91,9 @@ $.when(droneApp.getDrones).then(data => {
                 // define marker latitute and longtitute
                 let lat = singleStrike.lat
                 ,     lon = singleStrike.lon;
-
+                console.log(singleStrike);
                 // define information contained in popup
-                let town, summary, link, deaths;
+                let town, summary, link, deaths, time;
                 //NOTE👇: DO NOT DO THIS FIND A WAY TO WRAP THIS BETTER
                 const getPopupInfo = () => {
                     if (singleStrike.town.length) {
@@ -99,16 +104,20 @@ $.when(droneApp.getDrones).then(data => {
                         town = 'Unknown'
                     }
 
-                    if (singleStrike.bij_summary_short.length) {
-                        summary = singleStrike.bij_summary_short
-                    } else if (singleStrike.narrative.length){
+                    if (singleStrike.narrative.length) {
                         summary = singleStrike.narrative
+                    } else if (singleStrike.bij_summary_short.length){
+                        summary = singleStrike.bij_summary_short
                     } else {
                         summary = 'Awaiting detailed information on this strike...'
                     }
 
                     if (singleStrike.bij_link.length) {
                         link = singleStrike.bij_summary_short.length
+                    }
+
+                    if (singleStrike.displayDate.length) {
+                        time = singleStrike.displayDate
                     }
 
                     const numberReconstruct = () => {
@@ -122,7 +131,15 @@ $.when(droneApp.getDrones).then(data => {
                     numberReconstruct();
                 }
                 getPopupInfo();
-                const popup = new mapboxgl.Popup({offset: [0,-30]}).setText('sup');
+                const popup = new mapboxgl.Popup({offset: [0,0]}).setHTML(`
+                    <div class="marker-content">
+                        <p>${time}</p>
+                        <h3>${town}</h3>
+                        <h4>Deaths: ${deaths}</h4>
+                        <p>${summary}</p>
+                        <a href="${link}">More Details...</a>
+                    </div>
+                    `);
                 if (lat.length && lon.length) {
                     // when location exists create dom element for Marker
                     const el = document.createElement('div');
