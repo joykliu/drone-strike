@@ -4,6 +4,7 @@ const droneApp = {};
 mapboxgl.accessToken = 'pk.eyJ1Ijoiam95OTAxN21hcGJveCIsImEiOiJjaW94M2RneXQwMDJ1d2ZtNXp4a29pbTV4In0.TebEkoRfRP8E0hw_Nd3PFA';
 
 // calling for drone results
+
 droneApp.getDrones = $.ajax ({
     url: url,
     method: 'GET',
@@ -87,7 +88,7 @@ $.when(droneApp.getDrones).then(data => {
         // create empty array to store markers
         // display markers
         const displayMarkers = () => {
-            if (data.filteredStrikes.length) {
+            if (data.filteredStrikes !== undefined) {
                 data.filteredStrikes.forEach((singleStrike) => {
                     // define marker latitute and longtitute
                     let lat = singleStrike.lat
@@ -151,7 +152,7 @@ $.when(droneApp.getDrones).then(data => {
                         .setPopup(popup)
                         .addTo(droneApp.map);
                         // push markers to empty array
-                        markerArr.push([lon, lat])
+                        droneApp.markerArr.push([lon, lat])
                     };
                 })
             }

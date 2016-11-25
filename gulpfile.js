@@ -1,11 +1,14 @@
 'use strict'
 
-const gulp = require('gulp');
-const sass = require('gulp-sass');
-const concat = require('gulp-concat');
-const babel = require('gulp-babel');
-const autoprefixer = require('gulp-autoprefixer');
-const browserSync = require('browser-sync').create();
+const gulp = require('gulp')
+,     sass = require('gulp-sass')
+,     concat = require('gulp-concat')
+,     babel = require('gulp-babel')
+,     autoprefixer = require('gulp-autoprefixer')
+,     uglify = require('gulp-uglify')
+,     sourcemaps = require('gulp-sourcemaps')
+,     browserSync = require('browser-sync').create();
+
 const reload = browserSync.reload;
 
 gulp.task('styles', () => {
@@ -25,10 +28,14 @@ gulp.task('watch', () => {
 
 gulp.task('scripts', () => {
     gulp.src('dev/scripts/main.js')
+    .on('error', onError)
+        .pipe(sourcemaps.init())
         .pipe(babel({
             presets:['es2015']
         }))
-        .on('error', onError)
+        .pipe(concat('main.min.js'))
+        .pipe(uglify())
+        .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest('public/scripts/'))
         .pipe(reload({stream:true}));
 });
