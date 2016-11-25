@@ -71,88 +71,90 @@ $.when(droneApp.getDrones).then(data => {
             filteringResult(checkedYears, defaultYears, 'year', data.strike);
             // then call for data to be filtered wiht an filtered dataset
             filteringResult(checkedCountries, defaultCountries, 'country',data.filteredStrikes);
-            droneApp.displayStrikes();
+        })
+    }
+
+    droneApp.initMap = () => {
+        droneApp.map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/streets-v9'
         })
     }
 
     droneApp.displayStrikes = () => {
         // display map
-        let markerArr = [];
-        const displayMap = () => {
-            droneApp.map = new mapboxgl.Map({
-                container: 'map',
-                style: 'mapbox://styles/mapbox/streets-v9'
-            })
-        }
+        droneApp.markerArr = [];
         // create empty array to store markers
         // display markers
         const displayMarkers = () => {
-            data.filteredStrikes.forEach((singleStrike) => {
-                // define marker latitute and longtitute
-                let lat = singleStrike.lat
-                ,     lon = singleStrike.lon;
-                console.log(singleStrike);
-                // define information contained in popup
-                let town, summary, link, deaths, time;
-                //NOTE👇: DO NOT DO THIS FIND A WAY TO WRAP THIS BETTER
-                const getPopupInfo = () => {
-                    if (singleStrike.town.length) {
-                        town = singleStrike.town;
-                    } else if (singleStrike.location.length){
-                        town = singleStrike.location
-                    } else {
-                        town = 'Unknown'
-                    }
-
-                    if (singleStrike.narrative.length) {
-                        summary = singleStrike.narrative
-                    } else if (singleStrike.bij_summary_short.length){
-                        summary = singleStrike.bij_summary_short
-                    } else {
-                        summary = 'Awaiting detailed information on this strike...'
-                    }
-
-                    if (singleStrike.bij_link.length) {
-                        link = singleStrike.bij_summary_short.length
-                    }
-
-                    if (singleStrike.displayDate.length) {
-                        time = singleStrike.displayDate
-                    }
-
-                    const numberReconstruct = () => {
-                        let number = singleStrike.deaths;
-                        if(number.length > 2) {
-                            deaths = number.split('-').join(' to ')
+            if (data.filteredStrikes.length) {
+                data.filteredStrikes.forEach((singleStrike) => {
+                    // define marker latitute and longtitute
+                    let lat = singleStrike.lat
+                    ,     lon = singleStrike.lon;
+                    console.log(singleStrike);
+                    // define information contained in popup
+                    let town, summary, link, deaths, time;
+                    //NOTE👇: DO NOT DO THIS FIND A WAY TO WRAP THIS BETTER
+                    const getPopupInfo = () => {
+                        if (singleStrike.town.length) {
+                            town = singleStrike.town;
+                        } else if (singleStrike.location.length){
+                            town = singleStrike.location
                         } else {
-                            deaths = number;
+                            town = 'Unknown'
                         }
+
+                        if (singleStrike.narrative.length) {
+                            summary = singleStrike.narrative
+                        } else if (singleStrike.bij_summary_short.length){
+                            summary = singleStrike.bij_summary_short
+                        } else {
+                            summary = 'Awaiting detailed information on this strike...'
+                        }
+
+                        if (singleStrike.bij_link.length) {
+                            link = singleStrike.bij_summary_short.length
+                        }
+
+                        if (singleStrike.displayDate.length) {
+                            time = singleStrike.displayDate
+                        }
+
+                        const numberReconstruct = () => {
+                            let number = singleStrike.deaths;
+                            if(number.length > 2) {
+                                deaths = number.split('-').join(' to ')
+                            } else {
+                                deaths = number;
+                            }
+                        }
+                        numberReconstruct();
                     }
-                    numberReconstruct();
-                }
-                getPopupInfo();
-                const popup = new mapboxgl.Popup({offset: [0,0]}).setHTML(`
-                    <div class="marker-content">
-                        <p>${time}</p>
-                        <h3>${town}</h3>
-                        <h4>Deaths: ${deaths}</h4>
-                        <p>${summary}</p>
-                        <a href="${link}">More Details...</a>
-                    </div>
-                    `);
-                if (lat.length && lon.length) {
-                    // when location exists create dom element for Marker
-                    const el = document.createElement('div');
-                    el.className = 'marker';
-                    // add markeres to map
-                    droneApp.markers = new mapboxgl.Marker(el)
-                    .setLngLat([lon, lat])
-                    .setPopup(popup)
-                    .addTo(droneApp.map);
-                    // push markers to empty array
-                    markerArr.push([lon, lat])
-                };
-            })
+                    getPopupInfo();
+                    const popup = new mapboxgl.Popup({offset: [0,0]}).setHTML(`
+                        <div class="marker-content">
+                            <p>${time}</p>
+                            <h3>${town}</h3>
+                            <h4>Deaths: ${deaths}</h4>
+                            <p>${summary}</p>
+                            <a href="${link}">More Details...</a>
+                        </div>
+                        `);
+                    if (lat.length && lon.length) {
+                        // when location exists create dom element for Marker
+                        const el = document.createElement('div');
+                        el.className = 'marker';
+                        // add markeres to map
+                        droneApp.markers = new mapboxgl.Marker(el)
+                        .setLngLat([lon, lat])
+                        .setPopup(popup)
+                        .addTo(droneApp.map);
+                        // push markers to empty array
+                        markerArr.push([lon, lat])
+                    };
+                })
+            }
         }
         // fit map to marker bounds
         // NOTE: SOLUTION 1: CREATE FEATURE GROUP (GEOJSON) FOR MARKERS, GET FEATURE GROUP BOUNDS
@@ -165,7 +167,7 @@ $.when(droneApp.getDrones).then(data => {
                     "geometry": {
                         "type": "Markers",
                         "properties": {},
-                        "coordinates": markerArr
+                        "coordinates": droneApp.markerArr
                     }
                 }]
             };
@@ -182,13 +184,14 @@ $.when(droneApp.getDrones).then(data => {
             droneApp.map.fitBounds(bounds, {padding:50});
         }
 
-        displayMap();
         displayMarkers();
         fitMap();
     }
 
     droneApp.init = () => {
         droneApp.filteringResult();
+        droneApp.initMap();
+        droneApp.displayStrikes();
     }
 
     droneApp.init();
