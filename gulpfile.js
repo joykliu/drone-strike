@@ -27,16 +27,16 @@ gulp.task('watch', () => {
 });
 
 gulp.task('scripts', () => {
-    gulp.src('dev/scripts/main.js')
-    .on('error', onError)
-        .pipe(sourcemaps.init({loadMaps: true}))
+    return gulp.src('dev/scripts/main.js')
+        // .pipe(sourcemaps.init())
         .pipe(babel({
             presets:['es2015']
         }))
+        // .pipe(uglify())
+        .on('error', onError)
         .pipe(concat('main.min.js'))
-        .pipe(uglify())
-        .pipe(sourcemaps.write('.'))
-        .pipe(gulp.dest('public/scripts/'))
+        // .pipe(sourcemaps.write('.'))
+        .pipe(gulp.dest('./public/scripts/'))
         .pipe(reload({stream:true}));
 });
 
