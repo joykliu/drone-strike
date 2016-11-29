@@ -72,10 +72,12 @@ $.when(droneApp.getDrones).then(data => {
             filteringResult(checkedYears, defaultYears, 'year', data.strike);
             // then call for data to be filtered wiht an filtered dataset
             filteringResult(checkedCountries, defaultCountries, 'country',data.filteredStrikes);
+            droneApp.displayStrikes();
+
         })
     }
 
-    display map
+    //display map
     droneApp.initMap = () => {
         droneApp.map = new mapboxgl.Map({
             container: 'map',
@@ -193,9 +195,8 @@ $.when(droneApp.getDrones).then(data => {
     }
 
     droneApp.init = () => {
-        droneApp.filteringResult();
         droneApp.initMap();
-        droneApp.displayStrikes();
+        droneApp.filteringResult();
     }
 
     droneApp.init();
