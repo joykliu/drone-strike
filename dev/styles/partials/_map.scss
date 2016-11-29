@@ -8,5 +8,8 @@
         height: 40px;
         background: url('../images/marker.svg') no-repeat;
         background-size: cover;
+        background-color: #333;
+        // border-radius: 50%;
+        clip-path: polygon(50% 100%, 5% 0, 95% 0);
     }
 }

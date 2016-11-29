@@ -15,6 +15,7 @@ $.when(droneApp.getDrones).then(data => {
     // show date as year form
     droneApp.displayResults = () => {
         data.strike.map(result => {
+            console.log(result.country);
             const m_names = new Array("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December");
             result.date = result.date.split('-').splice(0,2);
             result.year = result.date[0];
@@ -89,10 +90,10 @@ $.when(droneApp.getDrones).then(data => {
                             let town, summary, link, deaths, time;
                             //NOTE👇: DO NOT DO THIS FIND A WAY TO WRAP THIS BETTER. USE TENERAY
                             const getPopupInfo = () => {
-                                if (singleStrike.town.length) {
-                                    town = singleStrike.town;
+                                if (singleStrike.town.length && singleStrike.country.length) {
+                                    town = singleStrike.town + singleStrike.country;
                                 } else if (singleStrike.location.length){
-                                    town = singleStrike.location
+                                    town = singleStrike.location + singleStrike.country
                                 } else {
                                     town = 'Unknown'
                                 }
@@ -188,7 +189,7 @@ $.when(droneApp.getDrones).then(data => {
     droneApp.initMap = () => {
         droneApp.map = new mapboxgl.Map({
             container: 'map',
-            style: 'mapbox://styles/mapbox/streets-v9',
+            style: 'mapbox://styles/mapbox/satellite-v9',
             center: [54.281023, 10.913129],
             zoom: 3
         })
