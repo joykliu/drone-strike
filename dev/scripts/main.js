@@ -15,7 +15,6 @@ $.when(droneApp.getDrones).then(data => {
     // show date as year form
     droneApp.displayResults = () => {
         data.strike.map(result => {
-            console.log(result.country);
             const m_names = new Array("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December");
             result.date = result.date.split('-').splice(0,2);
             result.year = result.date[0];
@@ -191,7 +190,8 @@ $.when(droneApp.getDrones).then(data => {
             container: 'map',
             style: 'mapbox://styles/mapbox/satellite-v9',
             center: [54.281023, 10.913129],
-            zoom: 3
+            zoom: 3,
+            maxZoom: 13
         })
     }
 
