@@ -13,7 +13,7 @@ droneApp.getDrones = $.ajax ({
 
 $.when(droneApp.getDrones).then(data => {
     // show date as year form
-    droneApp.filteringResult = () => {
+    droneApp.displayResults = () => {
         data.strike.map(result => {
             const m_names = new Array("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December");
             result.date = result.date.split('-').splice(0,2);
@@ -72,132 +72,132 @@ $.when(droneApp.getDrones).then(data => {
             filteringResult(checkedYears, defaultYears, 'year', data.strike);
             // then call for data to be filtered wiht an filtered dataset
             filteringResult(checkedCountries, defaultCountries, 'country',data.filteredStrikes);
-            droneApp.displayStrikes();
 
-        })
-    }
+            // display strike markers on map
+            const displayStrikes = () => {
+                // create empty array to store markers
+                droneApp.markerArr = [];
+
+                // display markers
+                const displayMarkers = () => {
+                    if (data.filteredStrikes) {
+                        data.filteredStrikes.forEach((singleStrike) => {
+                            // define marker latitute and longtitute
+                            const lat = singleStrike.lat
+                            ,     lon = singleStrike.lon;
+                            // define information contained in popup
+                            let town, summary, link, deaths, time;
+                            //NOTE👇: DO NOT DO THIS FIND A WAY TO WRAP THIS BETTER. USE TENERAY
+                            const getPopupInfo = () => {
+                                if (singleStrike.town.length) {
+                                    town = singleStrike.town;
+                                } else if (singleStrike.location.length){
+                                    town = singleStrike.location
+                                } else {
+                                    town = 'Unknown'
+                                }
+
+                                if (singleStrike.narrative.length) {
+                                    summary = singleStrike.narrative
+                                } else if (singleStrike.bij_summary_short.length){
+                                    summary = singleStrike.bij_summary_short
+                                } else {
+                                    summary = 'Awaiting detailed information on this strike...'
+                                }
+
+                                if (singleStrike.bij_link.length) {
+                                    link = singleStrike.bij_summary_short.length
+                                }
+
+                                if (singleStrike.displayDate.length) {
+                                    time = singleStrike.displayDate
+                                }
+
+                                const numberReconstruct = () => {
+                                    let number = singleStrike.deaths;
+                                    if(number.length > 2) {
+                                        deaths = number.split('-').join(' to ')
+                                    } else {
+                                        deaths = number;
+                                    }
+                                }
+                                numberReconstruct();
+                            }
+                            getPopupInfo();
+                            const popup = new mapboxgl.Popup({offset: [0,0]}).setHTML(`
+                                <div class="marker-content">
+                                    <p>${time}</p>
+                                    <h3>${town}</h3>
+                                    <h4>Deaths: ${deaths}</h4>
+                                    <p>${summary}</p>
+                                    <a href="${link}">More Details...</a>
+                                </div>
+                            `);
+                            if (lat.length && lon.length) {
+                                // when location exists create dom element for Marker
+                                const el = document.createElement('div');
+                                el.className = 'marker';
+                                // add markeres to map
+                                droneApp.markers = new mapboxgl.Marker(el)
+                                .setLngLat([lon, lat])
+                                .setPopup(popup)
+                                .addTo(droneApp.map);
+                                // push markers to empty array
+                                droneApp.markerArr.push([lon, lat])
+                            };
+                        })// forEach(singleStrike)
+                    } // if(param.length)
+                }// displayMarkers()
+                    // fit map to marker bounds
+                    // NOTE: SOLUTION 1: CREATE FEATURE GROUP (GEOJSON) FOR MARKERS, GET FEATURE GROUP BOUNDS
+                    // create geojson object to store marker coordinates sotred in markerArry
+                const fitMap = () => {
+                    if(data.filteredStrikes) {
+                        const geojson = {
+                            "type": "FeatureCollection",
+                            "features": [{
+                                "type": "Feature",
+                                "geometry": {
+                                    "type": "Markers",
+                                    "properties": {},
+                                    "coordinates": droneApp.markerArr
+                                }
+                            }]
+                        };
+                        const coordinates = geojson.features[0].geometry.coordinates;
+
+                        /* Pass the first coordinates in markerArry to `lngLatBounds` &
+                        ** wrap each coordinate pair in `extend` to include them in the bounds
+                        ** result. A variation of this technique could be applied to zooming
+                        ** to the bounds of multiple Points or Polygon geomteries - it just
+                        ** requires wrapping all the coordinates with the extend method. */
+                        const bounds = coordinates.reduce(function(bounds, coord) {
+                            return bounds.extend(coord);
+                        }, new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]));
+                        droneApp.map.fitBounds(bounds, {padding:50});
+                    }// if(data.filteredStrikes)
+                } // fit map
+                displayMarkers();
+                fitMap();
+            } // displayStrikes()
+            displayStrikes();
+        }) // Checkbox on change
+    } // displayResults()
 
     //display map
     droneApp.initMap = () => {
         droneApp.map = new mapboxgl.Map({
             container: 'map',
-            style: 'mapbox://styles/mapbox/streets-v9'
+            style: 'mapbox://styles/mapbox/streets-v9',
+            center: [54.281023, 10.913129],
+            zoom: 3
         })
     }
 
-    droneApp.displayStrikes = () => {
-        droneApp.markerArr = [];
-        // create empty array to store markers
-        // display markers
-
-        const displayMarkers = () => {
-            if (data.filteredStrikes) {
-                data.filteredStrikes.forEach((singleStrike) => {
-                    // console.log(singleStrike);
-                    // define marker latitute and longtitute
-                    const lat = singleStrike.lat
-                    ,     lon = singleStrike.lon;
-                    // console.log(singleStrike);
-                    // define information contained in popup
-                    let town, summary, link, deaths, time;
-                    //NOTE👇: DO NOT DO THIS FIND A WAY TO WRAP THIS BETTER
-                    const getPopupInfo = () => {
-                        if (singleStrike.town.length) {
-                            town = singleStrike.town;
-                        } else if (singleStrike.location.length){
-                            town = singleStrike.location
-                        } else {
-                            town = 'Unknown'
-                        }
-
-                        if (singleStrike.narrative.length) {
-                            summary = singleStrike.narrative
-                        } else if (singleStrike.bij_summary_short.length){
-                            summary = singleStrike.bij_summary_short
-                        } else {
-                            summary = 'Awaiting detailed information on this strike...'
-                        }
-
-                        if (singleStrike.bij_link.length) {
-                            link = singleStrike.bij_summary_short.length
-                        }
-
-                        if (singleStrike.displayDate.length) {
-                            time = singleStrike.displayDate
-                        }
-
-                        const numberReconstruct = () => {
-                            let number = singleStrike.deaths;
-                            if(number.length > 2) {
-                                deaths = number.split('-').join(' to ')
-                            } else {
-                                deaths = number;
-                            }
-                        }
-                        numberReconstruct();
-                        getPopupInfo();
-                    }
-                    const popup = new mapboxgl.Popup({offset: [0,0]}).setHTML(`
-                        <div class="marker-content">
-                        <p>${time}</p>
-                        <h3>${town}</h3>
-                        <h4>Deaths: ${deaths}</h4>
-                        <p>${summary}</p>
-                        <a href="${link}">More Details...</a>
-                        </div>
-                    `);
-                    if (lat.length && lon.length) {
-                        // when location exists create dom element for Marker
-                        const el = document.createElement('div');
-                        el.className = 'marker';
-                        // add markeres to map
-                        droneApp.markers = new mapboxgl.Marker(el)
-                        .setLngLat([lon, lat])
-                        .setPopup(popup)
-                        .addTo(droneApp.map);
-                        // push markers to empty array
-                        droneApp.markerArr.push([lon, lat])
-                    };
-                })
-            }
-        }
-        // fit map to marker bounds
-        // NOTE: SOLUTION 1: CREATE FEATURE GROUP (GEOJSON) FOR MARKERS, GET FEATURE GROUP BOUNDS
-        // create geojson object to store marker coordinates sotred in markerArry
-        const fitMap = () => {
-            if(data.filteredStrikes) {
-                const geojson = {
-                    "type": "FeatureCollection",
-                    "features": [{
-                        "type": "Feature",
-                        "geometry": {
-                            "type": "Markers",
-                            "properties": {},
-                            "coordinates": droneApp.markerArr
-                        }
-                    }]
-                };
-                const coordinates = geojson.features[0].geometry.coordinates;
-
-                /* Pass the first coordinates in markerArry to `lngLatBounds` &
-                ** wrap each coordinate pair in `extend` to include them in the bounds
-                ** result. A variation of this technique could be applied to zooming
-                ** to the bounds of multiple Points or Polygon geomteries - it just
-                ** requires wrapping all the coordinates with the extend method. */
-                const bounds = coordinates.reduce(function(bounds, coord) {
-                    return bounds.extend(coord);
-                }, new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]));
-                droneApp.map.fitBounds(bounds, {padding:50});
-            }
-        }
-        displayMarkers();
-        fitMap();
-    }
-
+    // initiate drone app
     droneApp.init = () => {
         droneApp.initMap();
-        droneApp.filteringResult();
+        droneApp.displayResults();
     }
-
     droneApp.init();
-})
+}) // promise
