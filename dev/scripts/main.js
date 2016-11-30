@@ -24,6 +24,11 @@ $.when(droneApp.getDrones).then(data => {
         })
 
         $(`input[type=checkbox]`).on('change', ()=> {
+            if (!droneApp.map) {
+                droneApp.initMap();
+                console.log(droneApp.map)
+            } else {
+            }
             // collect chekced values into an array
             let getCheckedInputValue = (param) => {
                 return $(`input[name=${param}]:checked`).map((input, value) => {
@@ -38,6 +43,7 @@ $.when(droneApp.getDrones).then(data => {
 
             // filter resutls
             const filteringResult = (checkedValues, defaultValues, category, baseData) => {
+
                 if(checkedValues.length !== 0) {
                     // when the user makes a selection filter data against checked boxes
                     var filteredRaw = checkedValues.map((criteria) => {
@@ -133,8 +139,10 @@ $.when(droneApp.getDrones).then(data => {
                                     <a href="${link}">More Details...</a>
                                 </div>
                             `);
-                            if (lat.length && lon.length) {
-                                // when location exists create dom element for Marker
+                            if (lat && lon) {
+                                // if (droneApp.markers) {
+                                //     droneApp.markers.remove();
+                                // }
                                 const el = document.createElement('div');
                                 el.className = 'marker';
                                 // add markeres to map
@@ -142,8 +150,10 @@ $.when(droneApp.getDrones).then(data => {
                                 .setLngLat([lon, lat])
                                 .setPopup(popup)
                                 .addTo(droneApp.map);
+                                console.log(droneApp.markers);
                                 // push markers to empty array
                                 droneApp.markerArr.push([lon, lat])
+                                // when location exists create dom element for Marker
                             };
                         })// forEach(singleStrike)
                     } // if(param.length)
@@ -177,12 +187,15 @@ $.when(droneApp.getDrones).then(data => {
                         droneApp.map.fitBounds(bounds, {padding:50});
                     } else if (droneApp.markerArr.length){
                         droneApp.map.flyTo({center:droneApp.markerArr[0]});
-                        console.log(droneApp.map)
                     }// if(data.filteredStrikes)
                 } // fit map
                 displayMarkers();
                 fitMap();
             } // displayStrikes()
+            if (droneApp.markers) {
+                droneApp.markers.remove();
+                console.log('is this working')
+            }
             displayStrikes();
         }) // Checkbox on change
     } // displayResults()
@@ -200,7 +213,6 @@ $.when(droneApp.getDrones).then(data => {
 
     // initiate drone app
     droneApp.init = () => {
-        droneApp.initMap();
         droneApp.displayResults();
     }
     droneApp.init();
