@@ -152,7 +152,7 @@ $.when(droneApp.getDrones).then(data => {
                     // NOTE: SOLUTION 1: CREATE FEATURE GROUP (GEOJSON) FOR MARKERS, GET FEATURE GROUP BOUNDS
                     // create geojson object to store marker coordinates sotred in markerArry
                 const fitMap = () => {
-                    if(data.filteredStrikes) {
+                    if(droneApp.markerArr.length > 1) {
                         const geojson = {
                             "type": "FeatureCollection",
                             "features": [{
@@ -175,6 +175,9 @@ $.when(droneApp.getDrones).then(data => {
                             return bounds.extend(coord);
                         }, new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]));
                         droneApp.map.fitBounds(bounds, {padding:50});
+                    } else if (droneApp.markerArr.length){
+                        droneApp.map.flyTo({center:droneApp.markerArr[0]});
+                        console.log(droneApp.map)
                     }// if(data.filteredStrikes)
                 } // fit map
                 displayMarkers();
