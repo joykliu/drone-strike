@@ -127,36 +127,37 @@ $.when(droneApp.getDrones).then(data => {
             }
             getPopupInfo();
             // create geojson objsct for markers
-            droneApp.map.addSource('places', {
+            droneApp.map.addSource("droneStrikes", {
                 "type": "geojson",
                 "data": {
-                    "type": "FeatureCollection",
-                    "features": [{
-                        "type": "Feature",
-                        "properties": {
-                            "description":
-                                `<div class="marker-content">
-                                    <p>${time}</p>
-                                    <h3>${town}</h3>
-                                    <h4>Deaths: ${deaths}</h4>
-                                    <p>${summary}</p>
-                                    <a href="${link}">More Details...</a>
-                                </div>`
-                        },
-                        "geometry": {
-                            "type": "Point",
-                            "coordinates": [lon, lat]
-                        }
-                    }]
+                    "type": "Feature",
+                    // "features": [{
+                    //     "type": "Feature",
+                    //     "properties": {
+                    //         "description":
+                    //             `<div class="marker-content">
+                    //                 <p>${time}</p>
+                    //                 <h3>${town}</h3>
+                    //                 <h4>Deaths: ${deaths}</h4>
+                    //                 <p>${summary}</p>
+                    //                 <a href="${link}">More Details...</a>
+                    //             </div>`
+                    //     }
+                    // }]
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [lon, lat]
+                    }
                 }
             });
             droneApp.map.addLayer({
-                "id": "places",
+                "id": "poop",
                 "type": "symbol",
-                "source": "places",
-                "layout": {
-
-                }
+                "source": "droneStrikes",
+                // "paint": {
+                //     "circle-radius": 6,
+                //     "circle-color": "#B42222"
+                // }
             })
             // const popup = new mapboxgl.Popup({offset: [0,0]}).setHTML(`
             //     <div class="marker-content">
