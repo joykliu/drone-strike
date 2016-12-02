@@ -26,10 +26,6 @@ $.when(droneApp.getDrones).then(data => {
         $(`input[type=checkbox]`).on('change', ()=> {
             if (droneApp.markers) {
                 console.log(droneApp.markers);
-
-                // droneApp.markers.forEach((marker) => {
-                //     marker.remove();
-                // })
             }
             // collect chekced values into an array
             let getCheckedInputValue = (param) => {
@@ -130,27 +126,59 @@ $.when(droneApp.getDrones).then(data => {
                 }
             }
             getPopupInfo();
-            const popup = new mapboxgl.Popup({offset: [0,0]}).setHTML(`
-                <div class="marker-content">
-                    <p>${time}</p>
-                    <h3>${town}</h3>
-                    <h4>Deaths: ${deaths}</h4>
-                    <p>${summary}</p>
-                    <a href="${link}">More Details...</a>
-                </div>
-            `);
-            if (lat && lon) {
-                const el = document.createElement('div');
-                el.className = 'marker';
-                // add markeres to map
-                droneApp.markers = new mapboxgl.Marker(el)
-                .setLngLat([lon, lat])
-                .setPopup(popup)
-                .addTo(droneApp.map);
-                // push markers to empty array
-                droneApp.markerArr.push([lon, lat])
-                // when location exists create dom element for Marker
-            };
+            // create geojson objsct for markers
+            droneApp.map.addSource('places', {
+                "type": "geojson",
+                "data": {
+                    "type": "FeatureCollection",
+                    "features": [{
+                        "type": "Feature",
+                        "properties": {
+                            "description":
+                                `<div class="marker-content">
+                                    <p>${time}</p>
+                                    <h3>${town}</h3>
+                                    <h4>Deaths: ${deaths}</h4>
+                                    <p>${summary}</p>
+                                    <a href="${link}">More Details...</a>
+                                </div>`
+                        },
+                        "geometry": {
+                            "type": "Point",
+                            "coordinates": [lon, lat]
+                        }
+                    }]
+                }
+            });
+            droneApp.map.addLayer({
+                "id": "places",
+                "type": "symbol",
+                "source": "places",
+                "layout": {
+
+                }
+            })
+            // const popup = new mapboxgl.Popup({offset: [0,0]}).setHTML(`
+            //     <div class="marker-content">
+            //         <p>${time}</p>
+            //         <h3>${town}</h3>
+            //         <h4>Deaths: ${deaths}</h4>
+            //         <p>${summary}</p>
+            //         <a href="${link}">More Details...</a>
+            //     </div>
+            // `);
+            // if (lat && lon) {
+            //     const el = document.createElement('div');
+            //     el.className = 'marker';
+            //     // add markeres to map
+            //     droneApp.markers = new mapboxgl.Marker(el)
+            //     .setLngLat([lon, lat])
+            //     .setPopup(popup)
+            //     .addTo(droneApp.map);
+            //     // push markers to empty array
+            //     droneApp.markerArr.push([lon, lat])
+            //     // when location exists create dom element for Marker
+            // };
         })// forEach(singleStrike)
         // fit map to marker bounds
         // NOTE: SOLUTION 1: CREATE FEATURE GROUP (GEOJSON) FOR MARKERS, GET FEATURE GROUP BOUNDS
