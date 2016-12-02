@@ -6,16 +6,25 @@ const gulp = require('gulp')
 ,     babel = require('gulp-babel')
 ,     autoprefixer = require('gulp-autoprefixer')
 ,     uglify = require('gulp-uglify')
+,     plumber = require('gulp-plumber')
 ,     sourcemaps = require('gulp-sourcemaps')
-,     browserSync = require('browser-sync').create();
+,     browserSync = require('browser-sync').create()
+,     notify = require('gulp-notify')
+,     cleanCSS = require('gulp-clean-css');
 
 const reload = browserSync.reload;
 
 gulp.task('styles', () => {
     return gulp.src('dev/styles/**/*.scss')
-        .pipe(sass().on('error', sass.logError))
-        .pipe(autoprefixer('last 2 versions', 'safari 5', 'ie 8', 'ie 9', 'opera 12.1'))
-        .pipe(concat('style.css'))
+        .pipe(plumber({
+          errorHandler: notify.onError("Error: <%= error.message %>")
+        }))
+        .pipe(sourcemaps.init())
+            .pipe(sass())
+            .pipe(cleanCSS())
+            .pipe(concat('style.css'))
+            .pipe(autoprefixer('last 2 versions', 'safari 5', 'ie 8', 'ie 9', 'opera 12.1'))
+        .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest('public/styles/'))
         .pipe(reload({stream:true}));
 });
@@ -28,14 +37,16 @@ gulp.task('watch', () => {
 
 gulp.task('scripts', () => {
     return gulp.src('dev/scripts/main.js')
-        // .pipe(sourcemaps.init())
-        .pipe(babel({
-            presets:['es2015']
+        .pipe(plumber({
+          errorHandler: notify.onError("Error: <%= error.message %>")
         }))
-        // .pipe(uglify())
-        .on('error', onError)
-        .pipe(concat('main.min.js'))
-        // .pipe(sourcemaps.write('.'))
+        .pipe(sourcemaps.init())
+            .pipe(babel({
+                presets:['es2015']
+            }))
+            .pipe(concat('main.min.js'))
+            .pipe(uglify())
+        .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest('./public/scripts/'))
         .pipe(reload({stream:true}));
 });
