@@ -126,61 +126,48 @@ $.when(droneApp.getDrones).then(data => {
                 }
             }
             getPopupInfo();
+
             // create geojson objsct for markers
-            droneApp.map.addSource("droneStrikes", {
-                "type": "geojson",
-                "data": {
-                    "type": "Feature",
-                    // "features": [{
-                    //     "type": "Feature",
-                    //     "properties": {
-                    //         "description":
-                    //             `<div class="marker-content">
-                    //                 <p>${time}</p>
-                    //                 <h3>${town}</h3>
-                    //                 <h4>Deaths: ${deaths}</h4>
-                    //                 <p>${summary}</p>
-                    //                 <a href="${link}">More Details...</a>
-                    //             </div>`
-                    //     }
-                    // }]
-                    "geometry": {
-                        "type": "Point",
-                        "coordinates": [lon, lat]
-                    }
+            // NOTE: need to reconstruct feature object to form proper geojson data
+            droneApp.featureObj =
+            {
+                "type": "Feature",
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [lon, lat]
+                },
+                "properties": {
+                    "title": singleStrike._id,
+                    "description":
+                    `<div class="marker-content">
+                    <p>${time}</p>
+                    <h3>${town}</h3>
+                    <h4>Deaths: ${deaths}</h4>
+                    <p>${summary}</p>
+                    <a href="${link}">More Details...</a>
+                    </div>`
                 }
-            });
-            droneApp.map.addLayer({
-                "id": "poop",
-                "type": "symbol",
-                "source": "droneStrikes",
-                // "paint": {
-                //     "circle-radius": 6,
-                //     "circle-color": "#B42222"
-                // }
-            })
-            // const popup = new mapboxgl.Popup({offset: [0,0]}).setHTML(`
-            //     <div class="marker-content">
-            //         <p>${time}</p>
-            //         <h3>${town}</h3>
-            //         <h4>Deaths: ${deaths}</h4>
-            //         <p>${summary}</p>
-            //         <a href="${link}">More Details...</a>
-            //     </div>
-            // `);
-            // if (lat && lon) {
-            //     const el = document.createElement('div');
-            //     el.className = 'marker';
-            //     // add markeres to map
-            //     droneApp.markers = new mapboxgl.Marker(el)
-            //     .setLngLat([lon, lat])
-            //     .setPopup(popup)
-            //     .addTo(droneApp.map);
-            //     // push markers to empty array
-            //     droneApp.markerArr.push([lon, lat])
-            //     // when location exists create dom element for Marker
-            // };
+            }
+            // droneApp.markerData = {
+            //     "type": "FeatureCollection",
+            //     "features": droneApp.Features
+            // }
         })// forEach(singleStrike)
+        const Features = [droneApp.featureObj];
+        console.log(Features);
+        // console.log(droneApp.markerData)
+        // droneApp.map.addLayer({
+        //     "id": "points",
+        //     "type": "symbol",
+        //     "source": "points",
+        //     "layout": {
+        //                "icon-image": "{icon}-15",
+        //                "text-field": "{title}",
+        //                "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
+        //                "text-offset": [0, 0.6],
+        //                "text-anchor": "top"
+        //            }
+        // })
         // fit map to marker bounds
         // NOTE: SOLUTION 1: CREATE FEATURE GROUP (GEOJSON) FOR MARKERS, GET FEATURE GROUP BOUNDS
         // create geojson object to store marker coordinates sotred in markerArry
