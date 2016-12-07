@@ -24,9 +24,6 @@ $.when(droneApp.getDrones).then(data => {
             result.displayDate = `${month}, ${result.year}`;
         })
         $(`input[type=checkbox]`).on('change', ()=> {
-            if (droneApp.markers) {
-                console.log(droneApp.markers);
-            }
             // collect chekced values into an array
             let getCheckedInputValue = (param) => {
                 return $(`input[name=${param}]:checked`).map((input, value) => {
@@ -85,6 +82,7 @@ $.when(droneApp.getDrones).then(data => {
     droneApp.displayStrikes = (strikeData) => {
         // create empty array to store markers
         droneApp.markerArr = [];
+        droneApp.feature = [];
         // display markers
         strikeData.forEach((singleStrike) => {
             // define marker latitute and longtitute
@@ -129,7 +127,7 @@ $.when(droneApp.getDrones).then(data => {
 
             // create geojson objsct for markers
             // NOTE: need to reconstruct feature object to form proper geojson data
-            droneApp.featureObj =
+            const featureObj =
             {
                 "type": "Feature",
                 "geometry": {
@@ -147,27 +145,16 @@ $.when(droneApp.getDrones).then(data => {
                     <a href="${link}">More Details...</a>
                     </div>`
                 }
-            }
-            // droneApp.markerData = {
-            //     "type": "FeatureCollection",
-            //     "features": droneApp.Features
-            // }
+            };
+            droneApp.feature.push(featureObj);
         })// forEach(singleStrike)
-        const Features = [droneApp.featureObj];
-        console.log(Features);
-        // console.log(droneApp.markerData)
-        // droneApp.map.addLayer({
-        //     "id": "points",
-        //     "type": "symbol",
-        //     "source": "points",
-        //     "layout": {
-        //                "icon-image": "{icon}-15",
-        //                "text-field": "{title}",
-        //                "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
-        //                "text-offset": [0, 0.6],
-        //                "text-anchor": "top"
-        //            }
-        // })
+        console.log(droneApp.feature);
+
+        // droneApp.markerData = {
+        //     "type": "FeatureCollection",
+        //     "features": feature
+        // }
+
         // fit map to marker bounds
         // NOTE: SOLUTION 1: CREATE FEATURE GROUP (GEOJSON) FOR MARKERS, GET FEATURE GROUP BOUNDS
         // create geojson object to store marker coordinates sotred in markerArry
