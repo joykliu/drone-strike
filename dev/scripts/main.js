@@ -148,12 +148,12 @@ $.when(droneApp.getDrones).then(data => {
             };
             droneApp.feature.push(featureObj);
         })// forEach(singleStrike)
-        console.log(droneApp.feature);
 
-        // droneApp.markerData = {
-        //     "type": "FeatureCollection",
-        //     "features": feature
-        // }
+        droneApp.markerData = {
+            "type": "FeatureCollection",
+            "features": droneApp.feature
+        }
+        console.log(droneApp.markerData);
 
         // fit map to marker bounds
         // NOTE: SOLUTION 1: CREATE FEATURE GROUP (GEOJSON) FOR MARKERS, GET FEATURE GROUP BOUNDS
