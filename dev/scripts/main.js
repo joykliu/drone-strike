@@ -126,7 +126,6 @@ $.when(droneApp.getDrones).then(data => {
             getPopupInfo();
 
             // create geojson objsct for markers
-            // NOTE: need to reconstruct feature object to form proper geojson data
             const featureObj =
             {
                 "type": "Feature",
@@ -153,10 +152,8 @@ $.when(droneApp.getDrones).then(data => {
             "type": "FeatureCollection",
             "features": droneApp.feature
         }
-        console.log(droneApp.markerData);
 
         // fit map to marker bounds
-        // NOTE: SOLUTION 1: CREATE FEATURE GROUP (GEOJSON) FOR MARKERS, GET FEATURE GROUP BOUNDS
         // create geojson object to store marker coordinates sotred in markerArry
         const fitMap = () => {
             if(droneApp.markerArr.length > 1) {
