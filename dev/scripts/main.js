@@ -149,43 +149,43 @@ $.when(droneApp.getDrones).then(data => {
             };
             droneApp.markerData.push(featureObj);
         })// forEach(singleStrike)
-
-        let geojson = {
-            "type": "FeatureCollection",
-            "features": droneApp.markerData
-        }
-
-        droneApp.map.addSource("strikes", {
-            "type": "geojson",
-            "data": geojson
-        });
-
-        droneApp.map.addLayer({
-            "id": "strikes",
-             type: 'symbol',
-             source: 'strikes',
-             "layout": {
-                 "icon-image": "harbor_icon",
-                 "icon-size":1.5
-             },
-             "paint": {}
-       });
-
-        geojson.features.forEach(function(marker) {
-            const el = document.createElement('div');
-            el.className = 'marker';
-            el.style.backgroundImgae = 'url(../images/marker.svg)';
-            el.style.width = marker.properties.iconSize[0] + 'px';
-            el.style.height = marker.properties.iconSize[1] + 'px';
-
-            if (marker.geometry.coordinates[0].length && marker.geometry.coordinates[1].length) {
-                new mapboxgl.Marker(el, {
-                    offset: [-marker.properties.iconSize[0] / 2, -marker.properties.iconSize[1] / 2]
-                })
-                .setLngLat(marker.geometry.coordinates)
-                .addTo(droneApp.map);
+        // droneApp.map.on('style.load', function() {
+            let geojson = {
+                "type": "FeatureCollection",
+                "features": droneApp.markerData
             }
-        });
+
+            droneApp.map.addSource("strikes", {
+                "type": "geojson",
+                "data": geojson
+            });
+
+            droneApp.map.addLayer({
+                "id": "strikes",
+                "type": "circle",
+                "source": "strikes",
+                "paint": {
+                    "circle-radius": 10,
+                    "circle-color": "#007cbf"
+                }
+            });
+        // })
+
+        // geojson.features.forEach(function(marker) {
+        //     const el = document.createElement('div');
+        //     el.className = 'marker';
+        //     el.style.backgroundImgae = 'url(../images/marker.svg)';
+        //     el.style.width = marker.properties.iconSize[0] + 'px';
+        //     el.style.height = marker.properties.iconSize[1] + 'px';
+        //
+        //     if (marker.geometry.coordinates[0].length && marker.geometry.coordinates[1].length) {
+        //         new mapboxgl.Marker(el, {
+        //             offset: [-marker.properties.iconSize[0] / 2, -marker.properties.iconSize[1] / 2]
+        //         })
+        //         .setLngLat(marker.geometry.coordinates)
+        //         .addTo(droneApp.map);
+        //     }
+        // // });
 
         droneApp.map.on('click', function(e) {
             const features = droneApp.map.queryRenderedFeatures(e.point, { layers: ['strikes'] });
