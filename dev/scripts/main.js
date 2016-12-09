@@ -24,6 +24,7 @@ $.when(droneApp.getDrones).then(data => {
             result.displayDate = `${month}, ${result.year}`;
         })
         $(`input[type=checkbox]`).on('change', ()=> {
+
             // collect chekced values into an array
             let getCheckedInputValue = (param) => {
                 return $(`input[name=${param}]:checked`).map((input, value) => {
@@ -154,6 +155,22 @@ $.when(droneApp.getDrones).then(data => {
             "features": droneApp.markerData
         }
 
+        droneApp.map.addSource("strikes", {
+            "type": "geojson",
+            "data": geojson
+        });
+
+        droneApp.map.addLayer({
+            "id": "strikes",
+             type: 'symbol',
+             source: 'strikes',
+             "layout": {
+                 "icon-image": "harbor_icon",
+                 "icon-size":1.5
+             },
+             "paint": {}
+       });
+
         geojson.features.forEach(function(marker) {
             const el = document.createElement('div');
             el.className = 'marker';
@@ -166,9 +183,24 @@ $.when(droneApp.getDrones).then(data => {
                     offset: [-marker.properties.iconSize[0] / 2, -marker.properties.iconSize[1] / 2]
                 })
                 .setLngLat(marker.geometry.coordinates)
-                .addTo(droneApp.map);        
+                .addTo(droneApp.map);
             }
         });
+
+        droneApp.map.on('click', function(e) {
+            const features = droneApp.map.queryRenderedFeatures(e.point, { layers: ['strikes'] });
+
+            if (!features.length) {
+                return;
+            }
+
+            const feature = features[0];
+
+            const popup = new mapboxgl.Popup()
+            .setLngLat(feature.geometry.coordinates)
+            .setHTML(feature.properties.description)
+            .addTo(droneApp.map)
+        })
 
         // fit map to marker bounds
         // create geojson object to store marker coordinates sotred in markerArry
