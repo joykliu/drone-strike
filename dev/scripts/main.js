@@ -82,7 +82,7 @@ $.when(droneApp.getDrones).then(data => {
     droneApp.displayStrikes = (strikeData) => {
         // create empty array to store markers
         droneApp.markerArr = [];
-        droneApp.feature = [];
+        droneApp.markerData = [];
         // display markers
         strikeData.forEach((singleStrike) => {
             // define marker latitute and longtitute
@@ -142,16 +142,33 @@ $.when(droneApp.getDrones).then(data => {
                     <h4>Deaths: ${deaths}</h4>
                     <p>${summary}</p>
                     <a href="${link}">More Details...</a>
-                    </div>`
+                    </div>`,
+                    "iconSize": [40,40]
                 }
             };
-            droneApp.feature.push(featureObj);
+            droneApp.markerData.push(featureObj);
         })// forEach(singleStrike)
 
-        droneApp.markerData = {
+        let geojson = {
             "type": "FeatureCollection",
-            "features": droneApp.feature
+            "features": droneApp.markerData
         }
+
+        geojson.features.forEach(function(marker) {
+            const el = document.createElement('div');
+            el.className = 'marker';
+            el.style.backgroundImgae = 'url(../images/marker.svg)';
+            el.style.width = marker.properties.iconSize[0] + 'px';
+            el.style.height = marker.properties.iconSize[1] + 'px';
+
+            if (marker.geometry.coordinates[0].length && marker.geometry.coordinates[1].length) {
+                new mapboxgl.Marker(el, {
+                    offset: [-marker.properties.iconSize[0] / 2, -marker.properties.iconSize[1] / 2]
+                })
+                .setLngLat(marker.geometry.coordinates)
+                .addTo(droneApp.map);        
+            }
+        });
 
         // fit map to marker bounds
         // create geojson object to store marker coordinates sotred in markerArry
