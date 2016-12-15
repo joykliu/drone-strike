@@ -81,6 +81,18 @@ $.when(droneApp.getDrones).then(data => {
 
     // display markers
     droneApp.displayStrikes = (strikeData) => {
+
+        // const strikesLayer = droneApp.map.style._layers.strikes;
+        // const strikesSource = droneApp.map.style.sourceCache.strikes;
+
+        // if(strikesLayer && strikesLayer.length > 0) {
+        //     droneApp.map.removeLayer(strikesLayer);
+        // }
+
+        if(droneApp.map.style._layers.strikes && droneApp.map.style._layers.strikes.length) {
+            droneApp.map.removeLayer(droneApp.map.style._layers.strikes);
+        }
+
         // create empty array to store markers
         droneApp.markerArr = [];
         droneApp.markerData = [];
@@ -149,27 +161,31 @@ $.when(droneApp.getDrones).then(data => {
             };
             droneApp.markerData.push(featureObj);
         })// forEach(singleStrike)
-        // droneApp.map.on('style.load', function() {
-            let geojson = {
-                "type": "FeatureCollection",
-                "features": droneApp.markerData
-            }
+        let geojson = {
+            "type": "FeatureCollection",
+            "features": droneApp.markerData
+        }
 
-            droneApp.map.addSource("strikes", {
+        // droneApp.map.addSource("strikes", {
+        //     "type": "geojson",
+        //     "data": geojson
+        // });
+
+        droneApp.map.addLayer({
+            "id": "strikes",
+            "type": "circle",
+            "source": {
                 "type": "geojson",
                 "data": geojson
-            });
+            },
+            "paint": {
+                "circle-radius": 10,
+                "circle-color": "#007cbf"
+            }
+        });
 
-            droneApp.map.addLayer({
-                "id": "strikes",
-                "type": "circle",
-                "source": "strikes",
-                "paint": {
-                    "circle-radius": 10,
-                    "circle-color": "#007cbf"
-                }
-            });
-        // })
+        // console.log(droneApp.map)
+
 
         // geojson.features.forEach(function(marker) {
         //     const el = document.createElement('div');
