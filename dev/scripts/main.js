@@ -14,7 +14,6 @@ droneApp.getDrones = $.ajax ({
 $.when(droneApp.getDrones).then(data => {
     // show date as year form
     droneApp.filterResults = () => {
-
         data.strike.map(result => {
             const m_names = new Array("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December");
             result.date = result.date.split('-').splice(0,2);
@@ -23,14 +22,15 @@ $.when(droneApp.getDrones).then(data => {
             const month = m_names[dateObj.getMonth()];
             result.displayDate = `${month}, ${result.year}`;
         })
-        $(`input[type=checkbox]`).on('change', ()=> {
 
+        $(`input[type=checkbox]`).on('change', ()=> {
             // collect chekced values into an array
             let getCheckedInputValue = (param) => {
                 return $(`input[name=${param}]:checked`).map((input, value) => {
                     return $(value).val()
                 }).toArray();
             }
+
             // define checked and default values for filter use
             const checkedYears = getCheckedInputValue('year');
             const checkedCountries = getCheckedInputValue('country');;
@@ -62,12 +62,13 @@ $.when(droneApp.getDrones).then(data => {
                         })
                     })
                 }
+
                 // turn filtered result, a multilevel array, into a flattened array
                 var filteredResult = $.map(filteredRaw, function(n) {
                     return n
                 })
+
                 data.filteredStrikes = filteredResult;
-                // return data;
             }
             // first call for data to be filtered with an original dataset
             filteringResult(checkedYears, defaultYears, 'year', data.strike);
@@ -81,21 +82,10 @@ $.when(droneApp.getDrones).then(data => {
 
     // display markers
     droneApp.displayStrikes = (strikeData) => {
-
-        // const strikesLayer = droneApp.map.style._layers.strikes;
-        // const strikesSource = droneApp.map.style.sourceCache.strikes;
-
-        // if(strikesLayer && strikesLayer.length > 0) {
-        //     droneApp.map.removeLayer(strikesLayer);
-        // }
-
-        if(droneApp.map.style._layers.strikes && droneApp.map.style._layers.strikes.length) {
-            droneApp.map.removeLayer(droneApp.map.style._layers.strikes);
-        }
-
         // create empty array to store markers
         droneApp.markerArr = [];
         droneApp.markerData = [];
+
         // display markers
         strikeData.forEach((singleStrike) => {
             // define marker latitute and longtitute
@@ -161,61 +151,51 @@ $.when(droneApp.getDrones).then(data => {
             };
             droneApp.markerData.push(featureObj);
         })// forEach(singleStrike)
+
         let geojson = {
             "type": "FeatureCollection",
             "features": droneApp.markerData
         }
 
-        // droneApp.map.addSource("strikes", {
-        //     "type": "geojson",
-        //     "data": geojson
-        // });
+        droneApp.map.addSource("strikes", {
+            "type": "geojson",
+            "data": geojson
+        });
 
         droneApp.map.addLayer({
             "id": "strikes",
             "type": "circle",
-            "source": {
-                "type": "geojson",
-                "data": geojson
-            },
+            "source": "strikes",
             "paint": {
                 "circle-radius": 10,
                 "circle-color": "#007cbf"
             }
         });
 
-        // console.log(droneApp.map)
+        //create popups, but not adding them to map yet
 
+        let popup = new mapboxgl.Popup({
+            closeButton: false,
+            closeOnClick: false
+        });
 
-        // geojson.features.forEach(function(marker) {
-        //     const el = document.createElement('div');
-        //     el.className = 'marker';
-        //     el.style.backgroundImgae = 'url(../images/marker.svg)';
-        //     el.style.width = marker.properties.iconSize[0] + 'px';
-        //     el.style.height = marker.properties.iconSize[1] + 'px';
-        //
-        //     if (marker.geometry.coordinates[0].length && marker.geometry.coordinates[1].length) {
-        //         new mapboxgl.Marker(el, {
-        //             offset: [-marker.properties.iconSize[0] / 2, -marker.properties.iconSize[1] / 2]
-        //         })
-        //         .setLngLat(marker.geometry.coordinates)
-        //         .addTo(droneApp.map);
-        //     }
-        // // });
-
-        droneApp.map.on('click', function(e) {
+        droneApp.map.on('mousemove', function(e) {
             const features = droneApp.map.queryRenderedFeatures(e.point, { layers: ['strikes'] });
 
+            // Change the cursor style as a UI indicator.
+            droneApp.map.getCanvas().style.cursor = (features.length) ? 'pointer' : '';
+
             if (!features.length) {
+                popup.remove();
                 return;
             }
-
             const feature = features[0];
 
-            const popup = new mapboxgl.Popup()
-            .setLngLat(feature.geometry.coordinates)
+            // Populate the popup and set its coordinates
+            // based on the feature found.
+            popup.setLngLat(feature.geometry.coordinates)
             .setHTML(feature.properties.description)
-            .addTo(droneApp.map)
+            .addTo(droneApp.map);
         })
 
         // fit map to marker bounds
