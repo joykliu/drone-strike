@@ -13,7 +13,7 @@ droneApp.getDrones = $.ajax ({
 
 $.when(droneApp.getDrones).then(data => {
     // show date as year form
-    droneApp.filterResults = () => {
+    droneApp.dataCleanUp = () => {
         data.strike.map(result => {
             const m_names = new Array("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December");
             result.date = result.date.split('-').splice(0,2);
@@ -22,68 +22,11 @@ $.when(droneApp.getDrones).then(data => {
             const month = m_names[dateObj.getMonth()];
             result.displayDate = `${month}, ${result.year}`;
         })
-
-        $(`input[type=checkbox]`).on('change', ()=> {
-            // collect chekced values into an array
-            let getCheckedInputValue = (param) => {
-                return $(`input[name=${param}]:checked`).map((input, value) => {
-                    return $(value).val()
-                }).toArray();
-            }
-
-            // define checked and default values for filter use
-            const checkedYears = getCheckedInputValue('year');
-            const checkedCountries = getCheckedInputValue('country');;
-            const defaultCountries = ['Yemen', 'Somalia', 'Pakistan'];
-            const defaultYears = ['2002', '2004', '2005', '2006', '2007', '2008', '2009', '2010', '2011', '2012', '2013', '2014', '2015', '2016'];
-
-            // filter resutls
-            const filteringResult = (checkedValues, defaultValues, category, baseData) => {
-                if(checkedValues.length !== 0) {
-                    // when the user makes a selection filter data against checked boxes
-                    var filteredRaw = checkedValues.map((criteria) => {
-                        return baseData.filter((singleStrike) => {
-                            if (category === 'year') {
-                                return singleStrike.year === criteria
-                            } else if (category === 'country') {
-                                return singleStrike.country === criteria
-                            }
-                        })
-                    })
-                } else {
-                    // when no selection is made, show all possible results
-                    var filteredRaw = defaultValues.map((criteria) => {
-                        return baseData.filter((singleStrike) => {
-                            if (category === 'year') {
-                                return singleStrike.year === criteria
-                            } else if (category === 'country') {
-                                return singleStrike.country === criteria;
-                            }
-                        })
-                    })
-                }
-
-                // turn filtered result, a multilevel array, into a flattened array
-                var filteredResult = $.map(filteredRaw, function(n) {
-                    return n
-                })
-
-                data.filteredStrikes = filteredResult;
-            }
-            // first call for data to be filtered with an original dataset
-            filteringResult(checkedYears, defaultYears, 'year', data.strike);
-            // then call for data to be filtered wiht an filtered dataset
-            filteringResult(checkedCountries, defaultCountries, 'country',data.filteredStrikes);
-
-            // display strike markers on map
-            droneApp.displayStrikes(data.filteredStrikes);
-        }) // Checkbox on change
     } // displayResults()
 
     // display markers
     droneApp.displayStrikes = (strikeData) => {
         // create empty array to store markers
-        droneApp.markerArr = [];
         droneApp.markerData = [];
 
         // display markers
@@ -93,6 +36,7 @@ $.when(droneApp.getDrones).then(data => {
             ,     lon = singleStrike.lon;
             // define information contained in popup
             let town, summary, link, deaths, time;
+
             //NOTE👇: DO NOT DO THIS FIND A WAY TO WRAP THIS BETTER. USE TENERAY
             const getPopupInfo = () => {
                 if (singleStrike.town.length && singleStrike.country.length) {
@@ -115,7 +59,7 @@ $.when(droneApp.getDrones).then(data => {
                     link = singleStrike.bij_summary_short.length
                 }
 
-                if (singleStrike.displayDate.length) {
+                if (singleStrike.displayDate) {
                     time = singleStrike.displayDate
                 }
 
@@ -125,6 +69,11 @@ $.when(droneApp.getDrones).then(data => {
                 } else {
                     deaths = number;
                 }
+
+                if(singleStrike.deaths_min === '0' && singleStrike.deaths_min === ' ' && singleStrike.deaths_min === '?') {
+                    console.log(singleStrike.deaths_min)
+                }
+
             }
             getPopupInfo();
 
@@ -137,7 +86,6 @@ $.when(droneApp.getDrones).then(data => {
                     "coordinates": [lon, lat]
                 },
                 "properties": {
-                    "title": singleStrike._id,
                     "description":
                     `<div class="marker-content">
                     <p>${time}</p>
@@ -152,26 +100,27 @@ $.when(droneApp.getDrones).then(data => {
             droneApp.markerData.push(featureObj);
         })// forEach(singleStrike)
 
-        let geojson = {
+        const geojson = {
             "type": "FeatureCollection",
             "features": droneApp.markerData
         }
 
-        droneApp.map.addSource("strikes", {
-            "type": "geojson",
-            "data": geojson
-        });
+        droneApp.map.on('load', () => {
+            droneApp.map.addSource("strikes", {
+                "type": "geojson",
+                "data": geojson
+            });
 
-        droneApp.map.addLayer({
-            "id": "strikes",
-            "type": "circle",
-            "source": "strikes",
-            "paint": {
-                "circle-radius": 10,
-                "circle-color": "#007cbf"
-            }
-        });
-
+            droneApp.map.addLayer({
+                "id": "strikes",
+                "type": "circle",
+                "source": "strikes",
+                "paint": {
+                    "circle-radius": 10,
+                    "circle-color": "#007cbf"
+                }
+            });
+        })
         //create popups, but not adding them to map yet
 
         let popup = new mapboxgl.Popup({
@@ -228,7 +177,7 @@ $.when(droneApp.getDrones).then(data => {
                 droneApp.map.flyTo({center:droneApp.markerArr[0]});
             }// if(data.filteredStrikes)
         } // fit map
-        fitMap();
+        // fitMap();
     } // displayStrikes()
 
     //display map
@@ -245,7 +194,8 @@ $.when(droneApp.getDrones).then(data => {
     // initiate drone app
     droneApp.init = () => {
         droneApp.initMap();
-        droneApp.filterResults();
+        droneApp.dataCleanUp();
+        droneApp.displayStrikes(data.strike);
     }
     droneApp.init();
 }) // promise
