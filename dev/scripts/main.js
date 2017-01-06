@@ -13,36 +13,51 @@ droneApp.getDrones = $.ajax ({
 
 $.when(droneApp.getDrones).then(data => {
     // show date as year form
+
+    // create empty array to store markers
+    droneApp.markerData = [];
+    droneApp.mapArr = [];
+    droneApp.listArr = [];
+
     droneApp.dataCleanUp = () => {
-        data.strike.map(result => {
+        const pakistanData = data.strike.filter(result => {
+            if (result.country) {
+                return result.country === 'Pakistan'
+            }
+        });
+
+        pakistanData.map((result) => {
             const m_names = new Array("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December");
             result.date = result.date.split('-').splice(0,2);
             result.year = result.date[0];
             let dateObj = new Date(result.date);
             const month = m_names[dateObj.getMonth()];
             result.displayDate = `${month}, ${result.year}`;
+
+            if (!result.lat && !result.lon) {
+                droneApp.listArr.push(result);
+            } else {
+                droneApp.mapArr.push (result)
+            }
         })
     } // displayResults()
 
     // display markers
     droneApp.displayStrikes = (strikeData) => {
-        // create empty array to store markers
-        droneApp.markerData = [];
-
         // display markers
         strikeData.forEach((singleStrike) => {
-            // define marker latitute and longtitute
-            const lat = singleStrike.lat
-            ,     lon = singleStrike.lon;
             // define information contained in popup
-            let town, summary, link, deaths, time;
+            let lat, lon, town, summary, link, deaths, time, min;
 
             //NOTE👇: DO NOT DO THIS FIND A WAY TO WRAP THIS BETTER. USE TENERAY
-            const getPopupInfo = () => {
+            const getMarkerInfo = () => {
+                lat = singleStrike.lat;
+                lon = singleStrike.lon;
+
                 if (singleStrike.town.length && singleStrike.country.length) {
-                    town = singleStrike.town + singleStrike.country;
+                    town = singleStrike.town + ', ' + singleStrike.country;
                 } else if (singleStrike.location.length){
-                    town = singleStrike.location + singleStrike.country
+                    town = singleStrike.location + ', ' + singleStrike.country
                 } else {
                     town = 'Unknown'
                 }
@@ -70,12 +85,11 @@ $.when(droneApp.getDrones).then(data => {
                     deaths = number;
                 }
 
-                if(singleStrike.deaths_min === '0' && singleStrike.deaths_min === ' ' && singleStrike.deaths_min === '?') {
-                    console.log(singleStrike.deaths_min)
+                if(singleStrike.min_deaths) {
+                    min = singleStrike.min_deaths
                 }
-
             }
-            getPopupInfo();
+            getMarkerInfo();
 
             // create geojson objsct for markers
             const featureObj =
@@ -94,7 +108,8 @@ $.when(droneApp.getDrones).then(data => {
                     <p>${summary}</p>
                     <a href="${link}">More Details...</a>
                     </div>`,
-                    "iconSize": [40,40]
+                    "iconSize": [40,40],
+                    "minDeaths": min
                 }
             };
             droneApp.markerData.push(featureObj);
@@ -111,15 +126,25 @@ $.when(droneApp.getDrones).then(data => {
                 "data": geojson
             });
 
+            var layers = [
+                [0, 'green'],
+                [20, 'orange'],
+                [200, 'red']
+            ];
+
             droneApp.map.addLayer({
                 "id": "strikes",
                 "type": "circle",
                 "source": "strikes",
                 "paint": {
                     "circle-radius": 10,
-                    "circle-color": "#007cbf"
+                    "circle-color": {
+                        property: "minDeaths"
+                    }
                 }
             });
+
+            console.log(droneApp.map)
         })
         //create popups, but not adding them to map yet
 
@@ -195,7 +220,7 @@ $.when(droneApp.getDrones).then(data => {
     droneApp.init = () => {
         droneApp.initMap();
         droneApp.dataCleanUp();
-        droneApp.displayStrikes(data.strike);
+        droneApp.displayStrikes(droneApp.mapArr);
     }
     droneApp.init();
 }) // promise
